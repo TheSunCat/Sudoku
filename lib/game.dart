@@ -50,15 +50,32 @@ class _SudokuGameState extends State<SudokuGame> {
 
   Widget _buildGridItems(BuildContext context, int index) {
     int boardLength = 9;
+    int sectorLength = 3;
+
     int x, y = 0;
-    x = (index / boardLength).floor();
-    y = (index % boardLength);
+    x = (index % boardLength);
+    y = (index / boardLength).floor();
+
+    // not my best code...
+    Border border = Border(
+      right:  ((x % sectorLength == sectorLength - 1) && (x != boardLength - 1))
+          ? BorderSide(width: 2.0, color: Theme.of(context).indicatorColor)
+          : ((x == boardLength - 1)
+            ? BorderSide.none
+            : BorderSide(width: 1.0, color: Theme.of(context).dividerColor)),
+      bottom: ((y % sectorLength == sectorLength - 1) && (y != boardLength - 1))
+          ? BorderSide(width: 2.0, color: Theme.of(context).indicatorColor)
+          : ((y == boardLength - 1)
+            ? BorderSide.none
+            : BorderSide(width: 1.0, color: Theme.of(context).dividerColor)),
+    );
+    
     return GestureDetector(
       onTap: () => { print("Tapped $x, $y") },
       child: GridTile(
         child: Container(
           decoration: BoxDecoration(
-              border: Border.all(color: Colors.black, width: 0.5)
+              border: border
           ),
           child: Center(
             child: _buildGridItem(x, y),
