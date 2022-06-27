@@ -12,6 +12,8 @@ class _SudokuGameState extends State<SudokuGame> {
   final Puzzle _puzzle = Puzzle(PuzzleOptions(patternName: "random"));
   Grid _board = Grid();
 
+  int _selectedNumber = -1;
+
   _SudokuGameState() {
     _puzzle.generate().then((_) {
       setState(() {
@@ -142,15 +144,19 @@ class _SudokuGameState extends State<SudokuGame> {
       padding: const EdgeInsets.all(4.0),
       child: OutlinedButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const SudokuGame()),
-          );
+          setState(() {
+            if(_selectedNumber == index) {
+              _selectedNumber = -1;
+            } else {
+              _selectedNumber = index;
+            }
+          });
         },
         style: ButtonStyle(
           shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(300.0))),
+          backgroundColor: _selectedNumber == index ? MaterialStateProperty.all(Theme.of(context).primaryColor) : null,
         ),
-        child: Container(
+        child: SizedBox(
           width: double.infinity,
           child: FittedBox(
             fit: BoxFit.fitWidth,
@@ -159,15 +165,15 @@ class _SudokuGameState extends State<SudokuGame> {
               child: Center(
                 child: Column(
                   children: [
-                    SizedBox(height: 6.0),
-                    Text(index.toString(),
+                    const SizedBox(height: 6.0),
+                    Text((index == 9) ? "X" : (index + 1).toString(),
                       style: TextStyle(
-                        color: Colors.grey.shade600,
+                        color: _selectedNumber == index ? Colors.white : Colors.grey.shade600,
                       ),
                     ),
                     Text((index - 1).toString(),
                       style: TextStyle(
-                        color: Colors.grey.shade600,
+                        color: _selectedNumber == index ? Colors.white : Colors.grey.shade600,
                         fontSize: 7,
                       ),
                     ),
