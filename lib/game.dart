@@ -16,9 +16,10 @@ class _SudokuGameState extends State<SudokuGame> {
 
   int _selectedNumber = -1;
 
+  late Timer refreshTimer;
   _SudokuGameState() {
     // refresh the timer every second
-    Timer.periodic(const Duration(seconds: 1), (Timer t) => setState((){}));
+    refreshTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) => setState((){}));
 
     _puzzle.generate().then((_) {
       _puzzle.startStopwatch();
@@ -27,6 +28,13 @@ class _SudokuGameState extends State<SudokuGame> {
         _board = _puzzle.board()!;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    refreshTimer.cancel();
   }
 
   @override
@@ -54,39 +62,41 @@ class _SudokuGameState extends State<SudokuGame> {
         shadowColor: Colors.transparent,
         foregroundColor: Colors.grey.shade800,
         centerTitle: true,
-        title: Text(timeString),
+        title: Text(timeString, style: Theme.of(context).textTheme.bodyMedium),
       ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: AspectRatio(
-              aspectRatio: 1.0,
-              child: Container(
-                padding: const EdgeInsets.all(8.0),
-                margin: const EdgeInsets.all(8.0),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: boardLength,
-                  ),
-                  itemBuilder: _buildGridItems,
-                  itemCount: boardLength * boardLength,
+          AspectRatio(
+            aspectRatio: 1.0,
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              margin: const EdgeInsets.all(8.0),
+              child: GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: boardLength,
                 ),
+                itemBuilder: _buildGridItems,
+                itemCount: boardLength * boardLength,
               ),
             ),
           ),
 
           Padding(
-            padding: const EdgeInsets.fromLTRB(80, 40, 80, 0),
-            child: GridView.builder(
-              shrinkWrap: true,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 5,
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Flexible(
+              flex: 1,
+              //padding: const EdgeInsets.fromLTRB(80, 40, 80, 0),
+              child: GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 5,
+                ),
+                itemBuilder: _buildNumberButtons,
+                itemCount: 10,
               ),
-              itemBuilder: _buildNumberButtons,
-              itemCount: 10,
             ),
           ),
         ]
