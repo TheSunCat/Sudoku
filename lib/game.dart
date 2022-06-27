@@ -22,29 +22,44 @@ class _SudokuGameState extends State<SudokuGame> {
 
   @override
   Widget build(BuildContext context) {
-    int boardLength = 9;
+    const int boardLength = 9;
 
     return Scaffold(
       body: Column(
-        children: <Widget>[
-          AspectRatio(
-          aspectRatio: 1.0,
-          child: Container(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
             padding: const EdgeInsets.all(8.0),
-            margin: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 2.0)
-            ),
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: boardLength,
+            child: AspectRatio(
+              aspectRatio: 1.0,
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                margin: const EdgeInsets.all(8.0),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: boardLength,
+                  ),
+                  itemBuilder: _buildGridItems,
+                  itemCount: boardLength * boardLength,
+                ),
               ),
-              itemBuilder: _buildGridItems,
-              itemCount: boardLength * boardLength,
             ),
           ),
-        ),
-      ])
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(80, 40, 80, 0),
+            child: GridView.builder(
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 5,
+              ),
+              itemBuilder: _buildNumberButtons,
+              itemCount: 10,
+            ),
+          ),
+        ]
+      )
     );
   }
 
@@ -118,6 +133,50 @@ class _SudokuGameState extends State<SudokuGame> {
             ),
           ),
         )
+      ),
+    );
+  }
+
+  Widget _buildNumberButtons(BuildContext context, int index) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: OutlinedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SudokuGame()),
+          );
+        },
+        style: ButtonStyle(
+          shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(300.0))),
+        ),
+        child: Container(
+          width: double.infinity,
+          child: FittedBox(
+            fit: BoxFit.fitWidth,
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Center(
+                child: Column(
+                  children: [
+                    SizedBox(height: 6.0),
+                    Text(index.toString(),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    Text((index - 1).toString(),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 7,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
