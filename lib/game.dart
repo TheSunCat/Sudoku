@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:sudoku_api/sudoku_api.dart';
 
@@ -15,7 +17,12 @@ class _SudokuGameState extends State<SudokuGame> {
   int _selectedNumber = -1;
 
   _SudokuGameState() {
+    // refresh the timer every second
+    Timer.periodic(const Duration(seconds: 1), (Timer t) => setState((){}));
+
     _puzzle.generate().then((_) {
+      _puzzle.startStopwatch();
+
       setState(() {
         _board = _puzzle.board()!;
       });
@@ -26,7 +33,29 @@ class _SudokuGameState extends State<SudokuGame> {
   Widget build(BuildContext context) {
     const int boardLength = 9;
 
+    String timeString = "";
+    Duration timer = _puzzle.getTimeElapsed();
+    if(timer.inDays != 0) {
+      timeString += "${timer.inDays}D ";
+    }
+    if(timer.inHours != 0) {
+      timeString += "${timer.inHours % 24}H ";
+    }
+    if(timer.inMinutes != 0) {
+      timeString += "${timer.inMinutes % 60}M ";
+    }
+    if(timer.inSeconds != 0) {
+      timeString += "${timer.inSeconds % 60}S";
+    }
+
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        foregroundColor: Colors.grey.shade800,
+        centerTitle: true,
+        title: Text(timeString),
+      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
