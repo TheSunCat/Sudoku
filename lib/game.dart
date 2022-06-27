@@ -179,6 +179,15 @@ class _SudokuGameState extends State<SudokuGame> {
   }
 
   Widget _buildNumberButtons(BuildContext context, int index) {
+    int count = 0;
+    for (int x = 0; x < 9; x++) {
+        for (int y = 0; y < 9; y++) {
+          if (_board.getColumn(x)[y].getValue() == index + 1) {
+            count++;
+          }
+        }
+    }
+
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: OutlinedButton(
@@ -210,7 +219,7 @@ class _SudokuGameState extends State<SudokuGame> {
                         color: _selectedNumber == index ? Colors.white : Colors.grey.shade600,
                       ),
                     ),
-                    Text((index - 1).toString(),
+                    Text((index == 9) ? "" : (9 - count).toString(),
                       style: TextStyle(
                         color: _selectedNumber == index ? Colors.white : Colors.grey.shade600,
                         fontSize: 7,
