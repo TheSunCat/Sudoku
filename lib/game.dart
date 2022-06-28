@@ -11,7 +11,7 @@ class SudokuGame extends StatefulWidget {
 }
 
 class _SudokuGameState extends State<SudokuGame> {
-  final Puzzle _puzzle = Puzzle(PuzzleOptions(patternName: "random"));
+  Puzzle puzzle = Puzzle(PuzzleOptions(patternName: "random"));
   Grid _board = Grid();
 
   int _selectedNumber = -1;
@@ -21,11 +21,11 @@ class _SudokuGameState extends State<SudokuGame> {
     // refresh the timer every second
     refreshTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) => setState((){}));
 
-    _puzzle.generate().then((_) {
-      _puzzle.startStopwatch();
+    puzzle.generate().then((_) {
+      puzzle.startStopwatch();
 
       setState(() {
-        _board = _puzzle.board()!;
+        _board = puzzle.board()!;
       });
     });
   }
@@ -42,7 +42,7 @@ class _SudokuGameState extends State<SudokuGame> {
     const int boardLength = 9;
 
     String timeString = "";
-    Duration timer = _puzzle.getTimeElapsed();
+    Duration timer = puzzle.getTimeElapsed();
     if(timer.inDays != 0) {
       timeString += "${timer.inDays}D ";
     }
@@ -86,17 +86,22 @@ class _SudokuGameState extends State<SudokuGame> {
 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Flexible(
-              flex: 1,
-              //padding: const EdgeInsets.fromLTRB(80, 40, 80, 0),
-              child: GridView.builder(
-                shrinkWrap: true,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5,
+            child: Flex(
+              direction: Axis.horizontal,
+              children: [
+                Flexible(
+                  flex: 1,
+                  //padding: const EdgeInsets.fromLTRB(80, 40, 80, 0),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 5,
+                    ),
+                    itemBuilder: _buildNumberButtons,
+                    itemCount: 10,
+                  ),
                 ),
-                itemBuilder: _buildNumberButtons,
-                itemCount: 10,
-              ),
+              ],
             ),
           ),
         ]
@@ -125,9 +130,21 @@ class _SudokuGameState extends State<SudokuGame> {
             ? BorderSide.none
             : BorderSide(width: 1.0, color: Theme.of(context).dividerColor)),
     );
-    
+
     return GestureDetector(
-      onTap: () => { print("Tapped $x, $y") },
+      onTap: () {
+        if(_selectedNumber == -1 || puzzle.board() == null) {
+          return;
+        }
+
+        setState(() {
+          if(_selectedNumber != 10) {
+            puzzle.fillCell(Position(row: y, column: x), _selectedNumber);
+          } else if (!puzzle.board()!.cellAt(Position(row: y, column: x)).prefill()!) {
+            puzzle.fillCell(Position(row: y, column: x), 0);
+          }
+        });
+      },
       child: GridTile(
         child: Container(
           decoration: BoxDecoration(
@@ -188,21 +205,23 @@ class _SudokuGameState extends State<SudokuGame> {
         }
     }
 
+    int selectedIndex = _selectedNumber - 1;
+
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: OutlinedButton(
         onPressed: () {
           setState(() {
-            if(_selectedNumber == index) {
+            if(_selectedNumber == index + 1) {
               _selectedNumber = -1;
             } else {
-              _selectedNumber = index;
+              _selectedNumber = index + 1;
             }
           });
         },
         style: ButtonStyle(
           shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(300.0))),
-          backgroundColor: _selectedNumber == index ? MaterialStateProperty.all(Theme.of(context).primaryColor) : null,
+          backgroundColor: selectedIndex == index ? MaterialStateProperty.all(Theme.of(context).primaryColor) : null,
         ),
         child: SizedBox(
           width: double.infinity,
@@ -216,12 +235,12 @@ class _SudokuGameState extends State<SudokuGame> {
                     const SizedBox(height: 6.0),
                     Text((index == 9) ? "X" : (index + 1).toString(),
                       style: TextStyle(
-                        color: _selectedNumber == index ? Colors.white : Colors.grey.shade600,
+                        color: selectedIndex == index ? Colors.white : Colors.grey.shade600,
                       ),
                     ),
                     Text((index == 9) ? "" : (9 - count).toString(),
                       style: TextStyle(
-                        color: _selectedNumber == index ? Colors.white : Colors.grey.shade600,
+                        color: selectedIndex == index ? Colors.white : Colors.grey.shade600,
                         fontSize: 7,
                       ),
                     ),
