@@ -4,30 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:sudoku_api/sudoku_api.dart';
 
 class SudokuGame extends StatefulWidget {
-  const SudokuGame({Key? key}) : super(key: key);
+  final int clues;
+
+  const SudokuGame({Key? key, required this.clues}) : super(key: key);
 
   @override
   State<SudokuGame> createState() => _SudokuGameState();
 }
 
 class _SudokuGameState extends State<SudokuGame> {
-  Puzzle puzzle = Puzzle(PuzzleOptions(patternName: "random"));
-  Grid _board = Grid();
+  Puzzle? _puzzle;
+  late Grid _board;
+  late Grid _solution;
+
+  bool _gameWon = false;
 
   int _selectedNumber = -1;
 
   late Timer refreshTimer;
-  _SudokuGameState() {
+  _SudokuGameState() : super() {
     // refresh the timer every second
     refreshTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) => setState((){}));
-
-    puzzle.generate().then((_) {
-      puzzle.startStopwatch();
-
-      setState(() {
-        _board = puzzle.board()!;
-      });
-    });
   }
 
   @override
@@ -39,10 +36,26 @@ class _SudokuGameState extends State<SudokuGame> {
 
   @override
   Widget build(BuildContext context) {
+    if (_puzzle == null) {
+      _puzzle = Puzzle(PuzzleOptions(patternName: "random", clues: widget.clues));
+
+      _puzzle!.generate().then((_) {
+        _puzzle!.startStopwatch();
+
+        setState(() {
+          _board = _puzzle!.board()!;
+        });
+
+        _solution =_puzzle!.solvedBoard()!;
+      });
+
+      return const Text("Loading...");
+    }
+
     const int boardLength = 9;
 
     String timeString = "";
-    Duration timer = puzzle.getTimeElapsed();
+    Duration timer = _puzzle!.getTimeElapsed();
     if(timer.inDays != 0) {
       timeString += "${timer.inDays}D ";
     }
@@ -133,21 +146,34 @@ class _SudokuGameState extends State<SudokuGame> {
 
     return GestureDetector(
       onTap: () {
-        if(_selectedNumber == -1 || puzzle.board() == null) {
+        if(_selectedNumber == -1 || _puzzle!.board() == null) {
           return;
         }
 
+        // place cell
         setState(() {
           if(_selectedNumber != 10) {
-            if(puzzle.board()!.cellAt(Position(row: y, column: x)).getValue() == _selectedNumber)
+            if(_puzzle!.board()!.cellAt(Position(row: y, column: x)).getValue() == _selectedNumber)
             {
-              puzzle.fillCell(Position(row: y, column: x), 0);
+              _puzzle!.fillCell(Position(row: y, column: x), 0);
             } else {
-              puzzle.fillCell(Position(row: y, column: x), _selectedNumber);
+              _puzzle!.fillCell(Position(row: y, column: x), _selectedNumber);
+
+              Future<bool> solved = isBoardSolved();
+              solved.then((value) {
+                if(value) {
+                  _gameWon = true;
+                  print("Won!");
+                } else {
+                  print("Not won!");
+                }
+              });
             }
-          } else if (!puzzle.board()!.cellAt(Position(row: y, column: x)).prefill()!) {
-            puzzle.fillCell(Position(row: y, column: x), 0);
+          } else if (!_puzzle!.board()!.cellAt(Position(row: y, column: x)).prefill()!) {
+            _puzzle!.fillCell(Position(row: y, column: x), 0);
           }
+
+
         });
       },
       child: GridTile(
@@ -178,7 +204,7 @@ class _SudokuGameState extends State<SudokuGame> {
         height: double.infinity,
 
         decoration: BoxDecoration(
-            color: Colors.grey.shade300,
+            color: (val == _selectedNumber) ? Theme.of(context).primaryColor : Colors.grey.shade300,
             borderRadius: BorderRadius.circular(100)
           //more than 50% of width makes circle
         ),
@@ -190,7 +216,7 @@ class _SudokuGameState extends State<SudokuGame> {
             child: Center(
               child: Text(val.toString(),
                 style: TextStyle(
-                  color: Colors.grey.shade600,
+                  color: (val == _selectedNumber) ? Colors.white : Colors.grey.shade600,
                 ),
               ),
             ),
@@ -269,5 +295,33 @@ class _SudokuGameState extends State<SudokuGame> {
         ),
       ),
     );
+  }
+
+  Future<bool> isBoardSolved() async
+  {
+    for(int i = 0; i < 9*9; i++) {
+      if(_board.cellAt(Position(index: i)).getValue() == 0) {
+        print("Board not full.");
+        return false;
+      }
+    }
+
+    for(int x = 0; x < 9; x++) {
+      if(_board.isColumnViolated(Position(column: x, row: 0))) {
+        print("Column $x violated.");
+        return false;
+      }
+      if(_board.isRowViolated(Position(row: x, column: 0))) {
+        print("Row $x violated.");
+        return false;
+      }
+
+      if(_board.isSegmentViolated(Position(index: x * 9))) {
+        print("Segment $x violated.");
+        return false;
+      }
+    }
+
+    return true;
   }
 }
