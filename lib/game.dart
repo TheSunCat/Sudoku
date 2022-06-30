@@ -18,6 +18,7 @@ class _SudokuGameState extends State<SudokuGame> {
 
   bool _gameWon = false;
 
+  bool _marking = false;
   int _selectedNumber = -1;
   List<Position> validationWrongCells = List.empty(growable: true);
 
@@ -182,9 +183,14 @@ class _SudokuGameState extends State<SudokuGame> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
-                          print("TODO: Mark mode");
+                          setState(() => {_marking = !_marking});
                         },
                         style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                              _marking ? Theme.of(context).primaryColor : null),
+                          foregroundColor: MaterialStateProperty.all(_marking
+                              ? Colors.white
+                              : Theme.of(context).primaryColor),
                           shape: MaterialStateProperty.all(
                               RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30.0))),
@@ -237,23 +243,43 @@ class _SudokuGameState extends State<SudokuGame> {
 
     return GestureDetector(
       onTap: () {
-        if (_selectedNumber == -1 || _puzzle!.board() == null) {
+        Position pos = Position(row: y, column: x);
+
+        if (_selectedNumber == -1 ||
+            _puzzle!.board() == null ||
+            _board!.cellAt(pos).prefill()!) {
           return;
         }
 
         // place cell
         setState(() {
           if (_selectedNumber != 10) {
-            if (_puzzle!
-                    .board()!
-                    .cellAt(Position(row: y, column: x))
-                    .getValue() ==
-                _selectedNumber) {
-              _puzzle!.fillCell(Position(row: y, column: x), 0);
+            if (!_marking &&
+                _puzzle!.board()!.cellAt(pos).getValue() == _selectedNumber) {
+              _puzzle!.fillCell(pos, 0);
               validationWrongCells.removeWhere(
                   (element) => (x == element.grid!.x && y == element.grid!.y));
+
+              print("a");
             } else {
-              _puzzle!.fillCell(Position(row: y, column: x), _selectedNumber);
+              if (_marking) {
+                Cell cell = _board!.cellAt(pos);
+                if (!cell.markup() ||
+                    !cell.getMarkup()!.contains(_selectedNumber)) {
+                  cell.addMarkup(_selectedNumber);
+                  print("b0");
+                } else {
+                  cell.removeMarkup(_selectedNumber);
+                  print("b1");
+                }
+
+                _puzzle!.fillCell(pos, 0);
+              } else {
+                _board!.cellAt(pos).clearMarkup();
+                _puzzle!.fillCell(pos, _selectedNumber);
+                print("c");
+              }
+
               validationWrongCells.removeWhere(
                   (element) => (x == element.grid!.x && y == element.grid!.y));
 
@@ -295,22 +321,31 @@ class _SudokuGameState extends State<SudokuGame> {
       return const SizedBox.shrink();
     }
 
-    int val = _board!.cellAt(Position(column: x, row: y)).getValue()!;
+    Cell cell = _board!.cellAt(Position(column: x, row: y));
 
-    if (val == 0) {
+    int val = cell.getValue()!;
+
+    if (val == 0 && !cell.markup()) {
       return const SizedBox.shrink();
     } // show nothing for empty cells
 
     Color itemColor = Colors.grey.shade300;
 
-    if (val == _selectedNumber) {
+    bool highlighted = false;
+
+    if (val == _selectedNumber ||
+        (cell.markup() && cell.getMarkup()!.contains(_selectedNumber))) {
       itemColor = Theme.of(context).primaryColor;
+      highlighted = true;
     }
 
     if (validationWrongCells
         .any((element) => ((element.grid!.x == x) && (element.grid!.y == y)))) {
       itemColor = Colors.red;
+      highlighted = true;
     }
+
+    List<String> markup = List.generate(cell.getMarkup()!.length, (index) => cell.getMarkup()!.elementAt(index).toString());
 
     return Padding(
       padding: const EdgeInsets.all(4.0),
@@ -327,14 +362,41 @@ class _SudokuGameState extends State<SudokuGame> {
             child: Padding(
               padding: const EdgeInsets.all(6.0),
               child: Center(
-                child: Text(
-                  val.toString(),
-                  style: TextStyle(
-                    color: (val == _selectedNumber)
-                        ? Colors.white
-                        : Colors.grey.shade600,
-                  ),
-                ),
+                child: cell.markup()
+                    ? DefaultTextStyle(
+                      style: TextStyle(color: highlighted ? Colors.white : Colors.grey.shade600),
+                      child: Column(
+                          children: [ // TODO this is ugly. Is there a better way?
+                            Row(      // NQSP to preserve small text size
+                              children: [
+                                Text(markup.length >= 8 ? markup[7] : " "),
+                                Text(markup.length >= 7 ? markup[6] : " "),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(markup.length >= 6 ? markup[5] : " "),
+                                Text(markup.length >= 5 ? markup[4] : " "),
+                                Text(markup.length >= 4 ? markup[3] : " "),
+                                Text(markup.length >= 3 ? markup[2] : " "),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(markup.length >= 2 ? markup[1] : " "),
+                                Text(markup.length >= 1 ? markup[0] : " "),
+                              ],
+                            )
+                          ],
+                        ),
+                    )
+                    : Text(
+                        val.toString(),
+                        style: TextStyle(
+                          color:
+                              highlighted ? Colors.white : Colors.grey.shade600,
+                        ),
+                      ),
               ),
             ),
           )),
