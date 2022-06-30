@@ -14,8 +14,7 @@ class SudokuGame extends StatefulWidget {
 
 class _SudokuGameState extends State<SudokuGame> {
   Puzzle? _puzzle;
-  late Grid _board;
-  late Grid _solution;
+  Grid? _board;
 
   bool _gameWon = false;
 
@@ -45,11 +44,13 @@ class _SudokuGameState extends State<SudokuGame> {
         setState(() {
           _board = _puzzle!.board()!;
         });
-
-        _solution =_puzzle!.solvedBoard()!;
       });
 
-      return const Text("Loading...");
+      /**
+       * TODO is it safe to just carry on and access puzzle data,
+       * despite it not being generated yet?
+       * Dunno about you, but sounds like a recipe for disaster to me.
+       */
     }
 
     const int boardLength = 9;
@@ -130,7 +131,11 @@ class _SudokuGameState extends State<SudokuGame> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      print("Refresh");
+                      // TODO ask for confirmation
+                      setState(() {
+                        _puzzle = null; // cause the board to be re-generated
+                        _selectedNumber = -1;
+                      });
                     },
                     style: ButtonStyle(
                       shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
@@ -251,7 +256,11 @@ class _SudokuGameState extends State<SudokuGame> {
   }
 
   Widget _buildGridItem(int x, int y) {
-    int val = _board.cellAt(Position(column: x, row: y)).getValue()!;
+    if(_board == null) {
+      return const SizedBox.shrink();
+    }
+
+    int val = _board!.cellAt(Position(column: x, row: y)).getValue()!;
 
     if(val == 0) {
       return const SizedBox.shrink();
@@ -288,10 +297,15 @@ class _SudokuGameState extends State<SudokuGame> {
   }
 
   Widget _buildNumberButtons(BuildContext context, int index) {
+    if(_board == null)
+    {
+      return const SizedBox.shrink();
+    }
+
     int count = 0;
     for (int x = 0; x < 9; x++) {
         for (int y = 0; y < 9; y++) {
-          if (_board.getColumn(x)[y].getValue() == index + 1) {
+          if (_board!.getColumn(x)[y].getValue() == index + 1) {
             count++;
           }
         }
@@ -361,23 +375,23 @@ class _SudokuGameState extends State<SudokuGame> {
   Future<bool> isBoardSolved() async
   {
     for(int i = 0; i < 9*9; i++) {
-      if(_board.cellAt(Position(index: i)).getValue() == 0) {
+      if(_board!.cellAt(Position(index: i)).getValue() == 0) {
         print("Board not full.");
         return false;
       }
     }
 
     for(int x = 0; x < 9; x++) {
-      if(_board.isColumnViolated(Position(column: x, row: 0))) {
+      if(_board!.isColumnViolated(Position(column: x, row: 0))) {
         print("Column $x violated.");
         return false;
       }
-      if(_board.isRowViolated(Position(row: x, column: 0))) {
+      if(_board!.isRowViolated(Position(row: x, column: 0))) {
         print("Row $x violated.");
         return false;
       }
 
-      if(_board.isSegmentViolated(Position(index: x * 9))) {
+      if(_board!.isSegmentViolated(Position(index: x * 9))) {
         print("Segment $x violated.");
         return false;
       }
