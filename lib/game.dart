@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sudoku/stack.dart';
 import 'package:sudoku_api/sudoku_api.dart';
+
+import 'move.dart';
 
 class SudokuGame extends StatefulWidget {
   final int clues;
@@ -15,6 +18,8 @@ class SudokuGame extends StatefulWidget {
 class _SudokuGameState extends State<SudokuGame> {
   Puzzle? _puzzle;
   Grid? _board;
+
+  final LIFO<Move> _undoStack = LIFO();
 
   bool _gameWon = false;
 
@@ -202,7 +207,24 @@ class _SudokuGameState extends State<SudokuGame> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
-                          print("TODO: Undo");
+                          if(_undoStack.isEmpty) {
+                            return;
+                          }
+
+                          // undo the move
+                          setState(() {
+                            Move move = _undoStack.pop();
+                            Cell cell = _board!.cellAt(Position(row: move.y, column: move.x));
+
+                            cell.setValue(move.value);
+
+                            cell.clearMarkup();
+                            // ignore: avoid_function_literals_in_foreach_calls
+                            move.markup.forEach((element) => {
+                              cell.addMarkup(element)
+                            });
+
+                          });
                         },
                         style: ButtonStyle(
                           shape: MaterialStateProperty.all(
@@ -244,26 +266,31 @@ class _SudokuGameState extends State<SudokuGame> {
     return GestureDetector(
       onTap: () {
         Position pos = Position(row: y, column: x);
+        Cell cell = _board!.cellAt(pos);
 
         if (_selectedNumber == -1 ||
             _puzzle!.board() == null ||
-            _board!.cellAt(pos).prefill()!) {
+            cell.prefill()!) {
           return;
         }
 
         // place cell
         setState(() {
+          _undoStack.push(Move(x, y, cell.getValue()!, List.from(cell.getMarkup()!)));
+
           if (_selectedNumber != 10) {
+
             if (!_marking &&
-                _puzzle!.board()!.cellAt(pos).getValue() == _selectedNumber) {
+                cell.getValue() == _selectedNumber) {
+
               _puzzle!.fillCell(pos, 0);
+
               validationWrongCells.removeWhere(
                   (element) => (x == element.grid!.x && y == element.grid!.y));
 
               print("a");
             } else {
               if (_marking) {
-                Cell cell = _board!.cellAt(pos);
                 if (!cell.markup() ||
                     !cell.getMarkup()!.contains(_selectedNumber)) {
                   cell.addMarkup(_selectedNumber);
@@ -275,7 +302,7 @@ class _SudokuGameState extends State<SudokuGame> {
 
                 _puzzle!.fillCell(pos, 0);
               } else {
-                _board!.cellAt(pos).clearMarkup();
+                cell.clearMarkup();
                 _puzzle!.fillCell(pos, _selectedNumber);
                 print("c");
               }
@@ -295,11 +322,9 @@ class _SudokuGameState extends State<SudokuGame> {
                 }
               });
             }
-          } else if (!_puzzle!
-              .board()!
-              .cellAt(Position(row: y, column: x))
-              .prefill()!) {
-            _puzzle!.fillCell(Position(row: y, column: x), 0);
+          } else if (!cell.prefill()!) {
+            cell.clearMarkup();
+            _puzzle!.fillCell(pos, 0);
             validationWrongCells.removeWhere(
                 (element) => (x == element.grid!.x && y == element.grid!.y));
           }
