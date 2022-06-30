@@ -197,7 +197,7 @@ class _SudokuGameState extends State<SudokuGame> {
     } // nothing
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(4.0),
       child: Container(
         // expand to fill parent
         width: double.infinity,
@@ -212,7 +212,7 @@ class _SudokuGameState extends State<SudokuGame> {
         child: FittedBox(
           fit: BoxFit.fitWidth,
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(6.0),
             child: Center(
               child: Text(val.toString(),
                 style: TextStyle(
