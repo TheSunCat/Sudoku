@@ -207,23 +207,22 @@ class _SudokuGameState extends State<SudokuGame> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
-                          if(_undoStack.isEmpty) {
+                          if (_undoStack.isEmpty) {
                             return;
                           }
 
                           // undo the move
                           setState(() {
                             Move move = _undoStack.pop();
-                            Cell cell = _board!.cellAt(Position(row: move.y, column: move.x));
+                            Cell cell = _board!
+                                .cellAt(Position(row: move.y, column: move.x));
 
                             cell.setValue(move.value);
 
                             cell.clearMarkup();
                             // ignore: avoid_function_literals_in_foreach_calls
-                            move.markup.forEach((element) => {
-                              cell.addMarkup(element)
-                            });
-
+                            move.markup.forEach(
+                                (element) => {cell.addMarkup(element)});
                           });
                         },
                         style: ButtonStyle(
@@ -276,35 +275,30 @@ class _SudokuGameState extends State<SudokuGame> {
 
         // place cell
         setState(() {
-          _undoStack.push(Move(x, y, cell.getValue()!, List.from(cell.getMarkup()!)));
+          _undoStack
+              .push(Move(x, y, cell.getValue()!, List.from(cell.getMarkup()!)));
 
           if (_selectedNumber != 10) {
-
-            if (!_marking &&
-                cell.getValue() == _selectedNumber) {
-
+            if (!_marking && cell.getValue() == _selectedNumber) {
               _puzzle!.fillCell(pos, 0);
 
               validationWrongCells.removeWhere(
                   (element) => (x == element.grid!.x && y == element.grid!.y));
 
-              print("a");
             } else {
               if (_marking) {
                 if (!cell.markup() ||
-                    !cell.getMarkup()!.contains(_selectedNumber)) {
+                    (!cell.getMarkup()!.contains(_selectedNumber) &&
+                        cell.getMarkup()!.length <= 8)) {
                   cell.addMarkup(_selectedNumber);
-                  print("b0");
                 } else {
                   cell.removeMarkup(_selectedNumber);
-                  print("b1");
                 }
 
                 _puzzle!.fillCell(pos, 0);
               } else {
                 cell.clearMarkup();
                 _puzzle!.fillCell(pos, _selectedNumber);
-                print("c");
               }
 
               validationWrongCells.removeWhere(
@@ -370,7 +364,8 @@ class _SudokuGameState extends State<SudokuGame> {
       highlighted = true;
     }
 
-    List<String> markup = List.generate(cell.getMarkup()!.length, (index) => cell.getMarkup()!.elementAt(index).toString());
+    List<String> markup = List.generate(cell.getMarkup()!.length,
+        (index) => cell.getMarkup()!.elementAt(index).toString());
 
     return Padding(
       padding: const EdgeInsets.all(4.0),
@@ -389,10 +384,15 @@ class _SudokuGameState extends State<SudokuGame> {
               child: Center(
                 child: cell.markup()
                     ? DefaultTextStyle(
-                      style: TextStyle(color: highlighted ? Colors.white : Colors.grey.shade600),
-                      child: Column(
-                          children: [ // TODO this is ugly. Is there a better way?
-                            Row(      // NQSP to preserve small text size
+                        style: TextStyle(
+                            color: highlighted
+                                ? Colors.white
+                                : Colors.grey.shade600),
+                        child: Column(
+                          children: [
+                            // TODO this is ugly. Is there a better way?
+                            Row(
+                              // NQSP to preserve small text size
                               children: [
                                 Text(markup.length >= 8 ? markup[7] : " "),
                                 Text(markup.length >= 7 ? markup[6] : " "),
@@ -414,7 +414,7 @@ class _SudokuGameState extends State<SudokuGame> {
                             )
                           ],
                         ),
-                    )
+                      )
                     : Text(
                         val.toString(),
                         style: TextStyle(
