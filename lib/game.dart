@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:sudoku/stack.dart';
 import 'package:sudoku_api/sudoku_api.dart';
 
+import 'fade_dialog.dart';
 import 'move.dart';
 
 class SudokuGame extends StatefulWidget {
@@ -25,7 +27,7 @@ class _SudokuGameState extends State<SudokuGame> {
 
   bool _marking = false;
   int _selectedNumber = -1;
-  List<Position> validationWrongCells = List.empty(growable: true);
+  List<Position> _validationWrongCells = List.empty(growable: true);
 
   late Timer refreshTimer;
   _SudokuGameState() : super() {
@@ -140,11 +142,13 @@ class _SudokuGameState extends State<SudokuGame> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
-                          // TODO ask for confirmation
-                          setState(() {
-                            _puzzle =
-                                null; // cause the board to be re-generated
-                            _selectedNumber = -1;
+                          fadeDialog(context, "Are you sure you want to restart this game?", "Cancel", "Restart", () => {}, () {
+                            setState(() {
+                              _puzzle = null; // cause the board to be re-generated
+                              _selectedNumber = -1;
+                              _validationWrongCells.clear();
+                              _undoStack.clear();
+                            });
                           });
                         },
                         style: ButtonStyle(
@@ -159,21 +163,23 @@ class _SudokuGameState extends State<SudokuGame> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
-                          validationWrongCells.clear();
+                          fadeDialog(context, "Are you sure you want to validate?", "Cancel", "Validate", () => {}, () {
+                            _validationWrongCells.clear();
 
-                          setState(() {
-                            for (int x = 0; x < 9; x++) {
-                              for (int y = 0; y < 9; y++) {
-                                Cell cell =
-                                    _board!.cellAt(Position(row: x, column: y));
-                                if (cell.getValue() != 0 &&
-                                    !cell.valid()! &&
-                                    !cell.pristine()!) {
-                                  validationWrongCells
-                                      .add(Position(row: y, column: x));
+                            setState(() {
+                              for (int x = 0; x < 9; x++) {
+                                for (int y = 0; y < 9; y++) {
+                                  Cell cell =
+                                  _board!.cellAt(Position(row: x, column: y));
+                                  if (cell.getValue() != 0 &&
+                                      !cell.valid()! &&
+                                      !cell.pristine()!) {
+                                    _validationWrongCells
+                                        .add(Position(row: y, column: x));
+                                  }
                                 }
                               }
-                            }
+                            });
                           });
                         },
                         style: ButtonStyle(
@@ -188,6 +194,7 @@ class _SudokuGameState extends State<SudokuGame> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
+                          // toggle marking mode
                           setState(() => {_marking = !_marking});
                         },
                         style: ButtonStyle(
@@ -282,7 +289,7 @@ class _SudokuGameState extends State<SudokuGame> {
             if (!_marking && cell.getValue() == _selectedNumber) {
               _puzzle!.fillCell(pos, 0);
 
-              validationWrongCells.removeWhere(
+              _validationWrongCells.removeWhere(
                   (element) => (x == element.grid!.x && y == element.grid!.y));
 
             } else {
@@ -301,7 +308,7 @@ class _SudokuGameState extends State<SudokuGame> {
                 _puzzle!.fillCell(pos, _selectedNumber);
               }
 
-              validationWrongCells.removeWhere(
+              _validationWrongCells.removeWhere(
                   (element) => (x == element.grid!.x && y == element.grid!.y));
 
               Future<bool> solved = isBoardSolved();
@@ -319,7 +326,7 @@ class _SudokuGameState extends State<SudokuGame> {
           } else if (!cell.prefill()!) {
             cell.clearMarkup();
             _puzzle!.fillCell(pos, 0);
-            validationWrongCells.removeWhere(
+            _validationWrongCells.removeWhere(
                 (element) => (x == element.grid!.x && y == element.grid!.y));
           }
         });
@@ -358,7 +365,7 @@ class _SudokuGameState extends State<SudokuGame> {
       highlighted = true;
     }
 
-    if (validationWrongCells
+    if (_validationWrongCells
         .any((element) => ((element.grid!.x == x) && (element.grid!.y == y)))) {
       itemColor = Colors.red;
       highlighted = true;
