@@ -48,6 +48,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -56,6 +58,9 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Icon(
+                size: screenWidth * .70,
+                Icons.tag_rounded),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -98,7 +103,8 @@ class _HomePageState extends State<HomePage> {
                   style: ButtonStyle(
                     shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
                   ),
-                  child: const Text("New Game")),
+                  child: const Text("New Game")
+              ),
             ),
           ],
         ),

@@ -23,11 +23,12 @@ class _SudokuGameState extends State<SudokuGame> {
 
   final LIFO<Move> _undoStack = LIFO();
 
-  bool _gameWon = false;
 
   bool _marking = false;
   int _selectedNumber = -1;
-  List<Position> _validationWrongCells = List.empty(growable: true);
+
+  int _validations = 0;
+  final List<Position> _validationWrongCells = List.empty(growable: true);
 
   late Timer refreshTimer;
   _SudokuGameState() : super() {
@@ -66,20 +67,7 @@ class _SudokuGameState extends State<SudokuGame> {
 
     const int boardLength = 9;
 
-    String timeString = "";
-    Duration timer = _puzzle!.getTimeElapsed();
-    if (timer.inDays != 0) {
-      timeString += "${timer.inDays}D ";
-    }
-    if (timer.inHours != 0) {
-      timeString += "${timer.inHours % 24}H ";
-    }
-    if (timer.inMinutes != 0) {
-      timeString += "${timer.inMinutes % 60}M ";
-    }
-    if (timer.inSeconds != 0) {
-      timeString += "${timer.inSeconds % 60}S";
-    }
+    String timeString = timeToString(_puzzle!.getTimeElapsed());
 
     return Scaffold(
         appBar: AppBar(
@@ -164,6 +152,8 @@ class _SudokuGameState extends State<SudokuGame> {
                       child: OutlinedButton(
                         onPressed: () {
                           fadeDialog(context, "Are you sure you want to validate?", "Cancel", "Validate", () => {}, () {
+                            _validations++;
+
                             _validationWrongCells.clear();
 
                             setState(() {
@@ -313,13 +303,9 @@ class _SudokuGameState extends State<SudokuGame> {
 
               Future<bool> solved = isBoardSolved();
               solved.then((value) {
-                // TODO win screen
 
                 if (value) {
-                  _gameWon = true;
-                  print("Won!");
-                } else {
-                  print("Not won!");
+                  win(context);
                 }
               });
             }
@@ -537,5 +523,64 @@ class _SudokuGameState extends State<SudokuGame> {
     }
 
     return true;
+  }
+
+  String timeToString(Duration time) {
+    String timeString = "";
+
+    if (time.inDays != 0) {
+      timeString += "${time.inDays}D ";
+    }
+    if (time.inHours != 0) {
+      timeString += "${time.inHours % 24}H ";
+    }
+    if (time.inMinutes != 0) {
+      timeString += "${time.inMinutes % 60}M ";
+    }
+    if (time.inSeconds != 0) {
+      timeString += "${time.inSeconds % 60}S";
+    }
+
+    return timeString;
+  }
+
+  void win(BuildContext context) {
+    _puzzle!.stopStopwatch();
+
+    List<String> winStrings = ["You win!", "Great job!", "Impressive.", "EYYYYYYYY"];
+
+    int rand = Random().nextInt(winStrings.length);
+
+    fadePopup(context, AlertDialog(
+      title: Center(child: Text(winStrings[rand])),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text("Difficulty: ${widget.clues}"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Validations used: $_validations"),
+            ],
+          ),
+          Text("Time: ${timeToString(_puzzle!.getTimeElapsed())}"),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 16.0, 0, 0),
+            child: OutlinedButton(
+              onPressed: () {
+                // TODO is this a good idea/allowed? How else do I pop twice?
+
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+              ),
+              child: const Text("Got it!")
+            ),
+          ),
+        ],
+      ),
+    ));
   }
 }

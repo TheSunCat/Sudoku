@@ -2,6 +2,33 @@ import 'package:flutter/material.dart';
 
 void fadeDialog(BuildContext context, String content, String no, String yes, void Function()? onNo, void Function()? onYes)
 {
+  fadePopup(context, AlertDialog(
+    //title: Text(title),
+    content: Text(content),
+    actions: <Widget>[
+      TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            if(onNo != null) {
+              onNo();
+            }
+          },
+          child: Text(no),
+      ),
+      TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            if(onYes != null) {
+              onYes();
+            }
+          },
+          child: Text(yes),
+      ),
+    ],
+  ));
+}
+
+void fadePopup(BuildContext context, Widget contents) {
   showGeneralDialog(
     context: context,
     pageBuilder: (ctx, a1, a2) {
@@ -24,30 +51,7 @@ void fadeDialog(BuildContext context, String content, String no, String yes, voi
         opacity: opacity,
         child: SlideTransition(
           position: tween.animate(curvedAnimation),
-          child: AlertDialog(
-            //title: Text(title),
-            content: Text(content),
-            actions: <Widget>[
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    if(onNo != null) {
-                      onNo();
-                    }
-                  },
-                  child: Text(no),
-              ),
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    if(onYes != null) {
-                      onYes();
-                    }
-                  },
-                  child: Text(yes),
-              ),
-            ],
-          ),
+          child: contents
         ),
       );
     },
