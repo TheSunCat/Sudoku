@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:sudoku/stack.dart';
+
 import 'package:sudoku_api/sudoku_api.dart';
 
 import 'fade_dialog.dart';
@@ -71,6 +72,7 @@ class _SudokuGameState extends State<SudokuGame> {
 
     return Scaffold(
         appBar: AppBar(
+          elevation: 0,
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
           foregroundColor: Colors.grey.shade800,
@@ -79,7 +81,6 @@ class _SudokuGameState extends State<SudokuGame> {
               Text(timeString, style: Theme.of(context).textTheme.bodyMedium),
         ),
         body: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//        mainAxisAlignment: MainAxisAlignment.center,
             children: [
               AspectRatio(
                 aspectRatio: 1.0,
@@ -105,7 +106,6 @@ class _SudokuGameState extends State<SudokuGame> {
                   children: [
                     Flexible(
                       flex: 1,
-                      //padding: const EdgeInsets.fromLTRB(80, 40, 80, 0),
                       child: GridView.builder(
                         shrinkWrap: true,
                         gridDelegate:
@@ -363,61 +363,69 @@ class _SudokuGameState extends State<SudokuGame> {
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: Container(
-          // expand to fill parent
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-              color: itemColor, borderRadius: BorderRadius.circular(100)
-              //more than 50% of width makes circle
-              ),
-          child: FittedBox(
-            fit: BoxFit.fitWidth,
-            child: Padding(
-              padding: const EdgeInsets.all(6.0),
-              child: Center(
-                child: cell.markup()
-                    ? DefaultTextStyle(
-                        style: TextStyle(
-                            color: highlighted
-                                ? Colors.white
-                                : Colors.grey.shade600),
-                        child: Column(
-                          children: [
-                            // TODO this is ugly. Is there a better way?
-                            Row(
-                              // NQSP to preserve small text size
-                              children: [
-                                Text(markup.length >= 8 ? markup[7] : " "),
-                                Text(markup.length >= 7 ? markup[6] : " "),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text(markup.length >= 6 ? markup[5] : " "),
-                                Text(markup.length >= 5 ? markup[4] : " "),
-                                Text(markup.length >= 4 ? markup[3] : " "),
-                                Text(markup.length >= 3 ? markup[2] : " "),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Text(markup.length >= 2 ? markup[1] : " "),
-                                Text(markup.length >= 1 ? markup[0] : " "),
-                              ],
-                            )
-                          ],
-                        ),
-                      )
-                    : Text(
-                        val.toString(),
-                        style: TextStyle(
-                          color:
-                              highlighted ? Colors.white : Colors.grey.shade600,
-                        ),
-                      ),
-              ),
+        // expand to fill parent
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+            color: itemColor, borderRadius: BorderRadius.circular(100)
+            //more than 50% of width makes circle
             ),
-          )),
+        child: Center(
+          child: cell.markup()
+              ? DefaultTextStyle(
+                  style: DefaultTextStyle.of(context).style.apply(
+                    decoration: TextDecoration.none,
+                    color: highlighted
+                        ? Colors.white
+                        : Colors.grey.shade600),
+                  child: Container(
+                    color: Colors.transparent,
+                    child: FittedBox(
+                      fit: BoxFit.fill,
+                      child: Column(
+                        children: [
+                          // TODO this is ugly. Is there a better way?
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            // NQSP to preserve small text size
+                            children: [
+                              Text(markup.length >= 8 ? markup[7] : " "),
+                              Text(markup.length >= 7 ? markup[6] : " "),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(markup.length >= 6 ? markup[5] : " "),
+                              Text(markup.length >= 5 ? markup[4] : " "),
+                              Text(markup.length >= 4 ? markup[3] : " "),
+                              Text(markup.length >= 3 ? markup[2] : " "),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(markup.length >= 2 ? markup[1] : " "),
+                              Text(markup.length >= 1 ? markup[0] : " "),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : FittedBox(
+                  fit: BoxFit.fill,
+                  child: Text(
+                    val.toString(),
+                    style: DefaultTextStyle.of(context).style.apply(
+                      color: highlighted ? Colors.white : Colors.grey.shade600,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ),
+        ),
+      ),
     );
   }
 
@@ -465,38 +473,48 @@ class _SudokuGameState extends State<SudokuGame> {
               ? MaterialStateProperty.all(Theme.of(context).primaryColor)
               : null,
         ),
-        child: SizedBox(
-          width: double.infinity,
-          child: FittedBox(
-            fit: BoxFit.fitWidth,
-            child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Center(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 6.0),
-                    Text(
-                      (index == 9) ? "X" : (index + 1).toString(),
-                      style: TextStyle(
-                        color: selectedIndex == index
-                            ? Colors.white
-                            : Colors.grey.shade600,
-                      ),
-                    ),
-                    Text(
-                      countString,
-                      style: TextStyle(
-                        color: selectedIndex == index
-                            ? Colors.white
-                            : Colors.grey.shade600,
-                        fontSize: 7,
-                      ),
-                    ),
-                  ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Expanded(
+              flex: 4,
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: Text(
+                  " ", // for spacing
                 ),
               ),
             ),
-          ),
+            Expanded(
+              flex: 6,
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: Text(
+                  (index == 9) ? "X" : (index + 1).toString(),
+                  style: TextStyle(
+                    color: selectedIndex == index
+                        ? Colors.white
+                        : Colors.grey.shade600,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Text(
+                countString,
+                style: TextStyle(
+                  color: selectedIndex == index
+                    ? Colors.white
+                    : Colors.grey.shade600,
+                ),
+              ),
+            ),
+            const Expanded(
+              flex: 1,
+              child: SizedBox.shrink()
+            ),
+          ],
         ),
       ),
     );
