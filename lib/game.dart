@@ -93,6 +93,7 @@ class _SudokuGameState extends State<SudokuGame> {
                 ),
                 itemBuilder: _buildGridItems,
                 itemCount: boardLength * boardLength,
+                primary: true, // disable scrolling
               ),
             ),
           ),
@@ -112,10 +113,58 @@ class _SudokuGameState extends State<SudokuGame> {
                     ),
                     itemBuilder: _buildNumberButtons,
                     itemCount: 10,
+                    primary: true, // disable scrolling
                   ),
                 ),
               ],
             ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+
+            children: [
+              OutlinedButton(
+                onPressed: () {
+                  print("Refresh");
+                },
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all(Size(100, 50)),
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                ),
+                child: const Icon(Icons.refresh),
+              ),
+              OutlinedButton(
+                onPressed: () {
+                  print("Validate");
+                },
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all(Size(100, 50)),
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                ),
+                child: const Icon(Icons.check),
+              ),
+              OutlinedButton(
+                onPressed: () {
+                  print("Mark");
+                },
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all(Size(100, 50)),
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                ),
+                child: const Icon(Icons.edit),
+              ),
+              OutlinedButton(
+                onPressed: () {
+                  print("Undo");
+                },
+                style: ButtonStyle(
+                  minimumSize: MaterialStateProperty.all(Size(100, 50)),
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                ),
+                child: const Icon(Icons.undo),
+              ),
+            ],
           ),
         ]
       )
