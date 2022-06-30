@@ -119,52 +119,64 @@ class _SudokuGameState extends State<SudokuGame> {
               ],
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Container(
+            height: 75,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
 
-
-            children: [
-              OutlinedButton(
-                onPressed: () {
-                  print("Refresh");
-                },
-                style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all(Size(100, 50)),
-                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+              children: [
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      print("Refresh");
+                    },
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                    ),
+                    child: const Icon(Icons.refresh),
+                  ),
                 ),
-                child: const Icon(Icons.refresh),
-              ),
-              OutlinedButton(
-                onPressed: () {
-                  print("Validate");
-                },
-                style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all(Size(100, 50)),
-                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      print("Validate");
+                    },
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                    ),
+                    child: const Icon(Icons.check),
+                  ),
                 ),
-                child: const Icon(Icons.check),
-              ),
-              OutlinedButton(
-                onPressed: () {
-                  print("Mark");
-                },
-                style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all(Size(100, 50)),
-                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      print("Mark");
+                    },
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                    ),
+                    child: const Icon(Icons.edit),
+                  ),
                 ),
-                child: const Icon(Icons.edit),
-              ),
-              OutlinedButton(
-                onPressed: () {
-                  print("Undo");
-                },
-                style: ButtonStyle(
-                  minimumSize: MaterialStateProperty.all(Size(100, 50)),
-                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      print("Undo");
+                    },
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                    ),
+                    child: const Icon(Icons.undo),
+                  ),
                 ),
-                child: const Icon(Icons.undo),
-              ),
-            ],
+                const SizedBox(width: 10),
+              ],
+            ),
           ),
         ]
       )
