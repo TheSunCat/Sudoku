@@ -139,7 +139,12 @@ class _SudokuGameState extends State<SudokuGame> {
 
         setState(() {
           if(_selectedNumber != 10) {
-            puzzle.fillCell(Position(row: y, column: x), _selectedNumber);
+            if(puzzle.board()!.cellAt(Position(row: y, column: x)).getValue() == _selectedNumber)
+            {
+              puzzle.fillCell(Position(row: y, column: x), 0);
+            } else {
+              puzzle.fillCell(Position(row: y, column: x), _selectedNumber);
+            }
           } else if (!puzzle.board()!.cellAt(Position(row: y, column: x)).prefill()!) {
             puzzle.fillCell(Position(row: y, column: x), 0);
           }
@@ -205,6 +210,18 @@ class _SudokuGameState extends State<SudokuGame> {
         }
     }
 
+    String countString = (9 - count).toString();
+    if(index == 9 || count == 9) {
+      countString = "";
+    } else
+    {
+      if(count > 9)
+      {
+        countString = "${count - 9}+";
+      }
+    }
+
+
     int selectedIndex = _selectedNumber - 1;
 
     return Padding(
@@ -238,7 +255,7 @@ class _SudokuGameState extends State<SudokuGame> {
                         color: selectedIndex == index ? Colors.white : Colors.grey.shade600,
                       ),
                     ),
-                    Text((index == 9) ? "" : (9 - count).toString(),
+                    Text(countString,
                       style: TextStyle(
                         color: selectedIndex == index ? Colors.white : Colors.grey.shade600,
                         fontSize: 7,
