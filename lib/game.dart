@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sudoku/stack.dart';
 
 import 'package:sudoku_api/sudoku_api.dart';
@@ -70,171 +71,201 @@ class _SudokuGameState extends State<SudokuGame> {
 
     String timeString = timeToString(_puzzle!.getTimeElapsed());
 
-    return Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          foregroundColor: Colors.grey.shade800,
-          centerTitle: true,
-          title:
-              Text(timeString, style: Theme.of(context).textTheme.bodyMedium),
-        ),
-        body: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark, // dark text for status bar
+        systemNavigationBarColor: Colors.transparent,
+      ),
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
             children: [
-              AspectRatio(
-                aspectRatio: 1.0,
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  margin: const EdgeInsets.all(8.0),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: boardLength,
-                    ),
-                    itemBuilder: _buildGridItems,
-                    itemCount: boardLength * boardLength,
-                    primary: true, // disable scrolling
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                      color: Colors.black,
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.arrow_back)
                   ),
-                ),
+                  Text(timeString, style: Theme.of(context).textTheme.bodyMedium),
+                  IconButton( // place secret icon to center text
+                    enableFeedback: false,
+                    color: Theme.of(context).canvasColor,
+                    onPressed: () => {},
+                    icon: const Icon(Icons.arrow_forward),
+                    splashRadius: 1,
+                  ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Flex(
-                  direction: Axis.horizontal,
-                  children: [
-                    Flexible(
-                      flex: 1,
-                      child: GridView.builder(
-                        shrinkWrap: true,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 5,
-                        ),
-                        itemBuilder: _buildNumberButtons,
-                        itemCount: 10,
-                        primary: true, // disable scrolling
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 75,
-                child: Row(
+              Expanded(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          fadeDialog(context, "Are you sure you want to restart this game?", "Cancel", "Restart", () => {}, () {
-                            setState(() {
-                              _puzzle = null; // cause the board to be re-generated
-                              _selectedNumber = -1;
-                              _validationWrongCells.clear();
-                              _undoStack.clear();
-                            });
-                          });
-                        },
-                        style: ButtonStyle(
-                          shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0))),
+                    AspectRatio(
+                      aspectRatio: 1.0,
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        margin: const EdgeInsets.all(8.0),
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: boardLength,
+                          ),
+                          itemBuilder: _buildGridItems,
+                          itemCount: boardLength * boardLength,
+                          primary: true, // disable scrolling
+                          physics: const NeverScrollableScrollPhysics(),
                         ),
-                        child: const Icon(Icons.refresh),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          fadeDialog(context, "Are you sure you want to validate?", "Cancel", "Validate", () => {}, () {
-                            _validations++;
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Flex(
+                        direction: Axis.horizontal,
+                        children: [
+                          Flexible(
+                            flex: 1,
+                            child: GridView.builder(
+                              shrinkWrap: true,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 5,
+                              ),
+                              itemBuilder: _buildNumberButtons,
+                              itemCount: 10,
+                              primary: true, // disable scrolling
+                              physics: const NeverScrollableScrollPhysics(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 75,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                fadeDialog(context, "Are you sure you want to restart this game?", "Cancel", "Restart", () => {}, () {
+                                  setState(() {
+                                    _puzzle = null; // cause the board to be re-generated
+                                    _selectedNumber = -1;
+                                    _validationWrongCells.clear();
+                                    _undoStack.clear();
+                                  });
+                                });
+                              },
+                              style: ButtonStyle(
+                                shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(30.0))),
+                              ),
+                              child: const Icon(Icons.refresh),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                fadeDialog(context, "Are you sure you want to validate?", "Cancel", "Validate", () => {}, () {
+                                  _validations++;
 
-                            _validationWrongCells.clear();
+                                  _validationWrongCells.clear();
 
-                            setState(() {
-                              for (int x = 0; x < 9; x++) {
-                                for (int y = 0; y < 9; y++) {
-                                  Cell cell =
-                                  _board!.cellAt(Position(row: x, column: y));
-                                  if (cell.getValue() != 0 &&
-                                      !cell.valid()! &&
-                                      !cell.pristine()!) {
-                                    _validationWrongCells
-                                        .add(Position(row: y, column: x));
-                                  }
+                                  setState(() {
+                                    for (int x = 0; x < 9; x++) {
+                                      for (int y = 0; y < 9; y++) {
+                                        Cell cell =
+                                        _board!.cellAt(Position(row: x, column: y));
+                                        if (cell.getValue() != 0 &&
+                                            !cell.valid()! &&
+                                            !cell.pristine()!) {
+                                          _validationWrongCells
+                                              .add(Position(row: y, column: x));
+                                        }
+                                      }
+                                    }
+                                  });
+                                });
+                              },
+                              style: ButtonStyle(
+                                shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(30.0))),
+                              ),
+                              child: const Icon(Icons.check),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                // toggle marking mode
+                                setState(() => {_marking = !_marking});
+                              },
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                    _marking ? Theme.of(context).primaryColor : null),
+                                foregroundColor: MaterialStateProperty.all(_marking
+                                    ? Colors.white
+                                    : Theme.of(context).primaryColor),
+                                shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(30.0))),
+                              ),
+                              child: const Icon(Icons.edit),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                if (_undoStack.isEmpty) {
+                                  return;
                                 }
-                              }
-                            });
-                          });
-                        },
-                        style: ButtonStyle(
-                          shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0))),
-                        ),
-                        child: const Icon(Icons.check),
+
+                                // undo the move
+                                setState(() {
+                                  Move move = _undoStack.pop();
+                                  Cell cell = _board!
+                                      .cellAt(Position(row: move.y, column: move.x));
+
+                                  cell.setValue(move.value);
+
+                                  cell.clearMarkup();
+                                  // ignore: avoid_function_literals_in_foreach_calls
+                                  move.markup.forEach(
+                                      (element) => {cell.addMarkup(element)});
+                                });
+                              },
+                              style: ButtonStyle(
+                                shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(30.0))),
+                              ),
+                              child: const Icon(Icons.undo),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          // toggle marking mode
-                          setState(() => {_marking = !_marking});
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                              _marking ? Theme.of(context).primaryColor : null),
-                          foregroundColor: MaterialStateProperty.all(_marking
-                              ? Colors.white
-                              : Theme.of(context).primaryColor),
-                          shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0))),
-                        ),
-                        child: const Icon(Icons.edit),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          if (_undoStack.isEmpty) {
-                            return;
-                          }
-
-                          // undo the move
-                          setState(() {
-                            Move move = _undoStack.pop();
-                            Cell cell = _board!
-                                .cellAt(Position(row: move.y, column: move.x));
-
-                            cell.setValue(move.value);
-
-                            cell.clearMarkup();
-                            // ignore: avoid_function_literals_in_foreach_calls
-                            move.markup.forEach(
-                                (element) => {cell.addMarkup(element)});
-                          });
-                        },
-                        style: ButtonStyle(
-                          shape: MaterialStateProperty.all(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0))),
-                        ),
-                        child: const Icon(Icons.undo),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
                   ],
                 ),
               ),
-            ]));
+            ],
+          ),
+        )
+      ),
+    );
   }
 
   Widget _buildGridItems(BuildContext context, int index) {
