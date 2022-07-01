@@ -211,13 +211,16 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                                   setState(() {
                                     for (int x = 0; x < 9; x++) {
                                       for (int y = 0; y < 9; y++) {
-                                        Cell cell =
-                                        _board!.cellAt(Position(row: x, column: y));
+                                        Position pos = Position(row: y, column: x);
+                                        Cell cell = _board!.cellAt(pos);
                                         if (cell.getValue() != 0 &&
-                                            !cell.valid()! &&
-                                            !cell.pristine()!) {
-                                          _validationWrongCells
-                                              .add(Position(row: y, column: x));
+                                            !cell.prefill()!) {
+
+                                          if(cellInvalid(x, y)) {
+                                            _validationWrongCells
+                                                .add(
+                                                Position(row: x, column: y));
+                                          }
                                         }
                                       }
                                     }
@@ -384,12 +387,15 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
           }
         });
       },
-      child: GridTile(
-        child: CustomPaint(
-          foregroundPainter: EdgePainter(border, x != boardLength - 1, y != boardLength - 1),
-          //decoration: BoxDecoration(border: border),
-          child: Center(
-            child: _buildGridItem(x, y),
+      child: Container( // for tap target
+        color: Colors.transparent,
+        child: GridTile(
+          child: CustomPaint(
+            foregroundPainter: EdgePainter(border, x != boardLength - 1, y != boardLength - 1),
+            //decoration: BoxDecoration(border: border),
+            child: Center(
+              child: _buildGridItem(x, y),
+            ),
           ),
         ),
       ),
@@ -689,5 +695,45 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
         ],
       ),
     ));
+  }
+
+  bool cellInvalid(int x, int y) {
+    Cell cell = _board!.cellAt(Position(row: y, column: x));
+
+    if(cell.prefill()!) {
+      return false;
+    }
+
+    Position pos = cell.getPosition()!;
+    int value = cell.getValue()!;
+
+    if(valueRepeats(_board!.getSegment(pos), value)) {
+      return true;
+    }
+
+    if(valueRepeats(_board!.getRow(y), value)) {
+      return true;
+    }
+
+    if(valueRepeats(_board!.getColumn(x), value)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool valueRepeats(List<Cell> cells, int value) {
+    Set<int> seenValues = {};
+    for(int i = 0; i < cells.length; i++) {
+      int curVal = cells[i].getValue()!;
+
+      if (seenValues.contains(curVal) && curVal == value) {
+        return true;
+      }
+
+      seenValues.add(curVal);
+    }
+
+    return false;
   }
 }
