@@ -399,7 +399,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
       return const SizedBox.shrink();
     }
 
-    Color textColor = Theme.of(context).textTheme.bodyMedium!.color!;
+
 
     Cell cell = _board!.cellAt(Position(column: x, row: y));
 
@@ -409,7 +409,13 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
       return const SizedBox.shrink();
     } // show nothing for empty cells
 
-    Color itemColor = textColor.withOpacity(0.07);
+    Color textColor = Theme.of(context).textTheme.bodyMedium!.color!;
+    Color itemColor = Colors.transparent;
+
+    if(cell.prefill()!) {
+      textColor = textColor.withOpacity(0.65);
+      itemColor = textColor.withOpacity(0.07);
+    }
 
     bool highlighted = false;
 
