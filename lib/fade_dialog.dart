@@ -25,11 +25,15 @@ void fadeDialog(BuildContext context, String content, String no, String yes, voi
           child: Text(yes),
       ),
     ],
-  ));
+  ),
+    dismissable: true
+  );
 }
 
-void fadePopup(BuildContext context, Widget contents) {
+void fadePopup(BuildContext context, Widget contents, {bool dismissable = false}) {
   showGeneralDialog(
+    barrierDismissible: dismissable,
+    barrierLabel: "Do I really have to give it a name?",
     context: context,
     pageBuilder: (ctx, a1, a2) {
       return Container();

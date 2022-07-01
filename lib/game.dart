@@ -182,7 +182,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                           Expanded(
                             child: OutlinedButton(
                               onPressed: () {
-                                fadeDialog(context, "Are you sure you want to restart this game?", "Cancel", "Restart", () => {}, () {
+                                fadeDialog(context, "Are you sure you want to restart with a new board?", "Cancel", "Restart", () => {}, () {
                                   setState(() {
                                     _puzzle = null; // cause the board to be re-generated
                                     _selectedNumber = -1;
