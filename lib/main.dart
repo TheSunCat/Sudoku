@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:sudoku/game.dart';
+import 'package:sudoku/painters.dart';
 
 void main() {
   runApp(const Sudoku());
@@ -17,6 +18,7 @@ class Sudoku extends StatelessWidget {
       title: 'Sudoku',
       theme: ThemeData(
         primarySwatch: Colors.purple,
+        textTheme: TextTheme(bodyMedium: TextStyle(color: Colors.grey.shade600)),
       ),
       home: const HomePage(),
     );
@@ -53,9 +55,20 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(
-                size: screenWidth * .70,
-                Icons.tag_rounded),
+            Container(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(500)
+                //more than 50% of width makes circle
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: CustomPaint(
+                  size: Size(screenWidth * .50, screenWidth * .50),
+                  painter: LogoPainter(Theme.of(context).canvasColor),
+                ),
+              ),
+            ),
+            const SizedBox(height: 50),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,

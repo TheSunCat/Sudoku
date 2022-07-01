@@ -86,7 +86,7 @@ class _SudokuGameState extends State<SudokuGame> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                      color: Colors.black,
+                      color: Theme.of(context).textTheme.bodyMedium!.color!,
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back)
                   ),
@@ -215,8 +215,8 @@ class _SudokuGameState extends State<SudokuGame> {
                                 backgroundColor: MaterialStateProperty.all(
                                     _marking ? Theme.of(context).primaryColor : null),
                                 foregroundColor: MaterialStateProperty.all(_marking
-                                    ? Colors.white
-                                    : Theme.of(context).primaryColor),
+                                    ? Theme.of(context).canvasColor
+                                    : null),
                                 shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(30.0))),
@@ -364,6 +364,8 @@ class _SudokuGameState extends State<SudokuGame> {
       return const SizedBox.shrink();
     }
 
+    Color textColor = Theme.of(context).textTheme.bodyMedium!.color!;
+
     Cell cell = _board!.cellAt(Position(column: x, row: y));
 
     int val = cell.getValue()!;
@@ -372,7 +374,7 @@ class _SudokuGameState extends State<SudokuGame> {
       return const SizedBox.shrink();
     } // show nothing for empty cells
 
-    Color itemColor = Colors.grey.shade300;
+    Color itemColor = textColor.withOpacity(0.07);
 
     bool highlighted = false;
 
@@ -384,7 +386,7 @@ class _SudokuGameState extends State<SudokuGame> {
 
     if (_validationWrongCells
         .any((element) => ((element.grid!.x == x) && (element.grid!.y == y)))) {
-      itemColor = Colors.red;
+      itemColor = Colors.red; // TODO desaturate
       highlighted = true;
     }
 
@@ -398,17 +400,17 @@ class _SudokuGameState extends State<SudokuGame> {
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-            color: itemColor, borderRadius: BorderRadius.circular(100)
-            //more than 50% of width makes circle
-            ),
+          color: itemColor, borderRadius: BorderRadius.circular(500)
+          //more than 50% of width makes circle
+        ),
         child: Center(
           child: cell.markup()
               ? DefaultTextStyle(
                   style: DefaultTextStyle.of(context).style.apply(
                     decoration: TextDecoration.none,
                     color: highlighted
-                        ? Colors.white
-                        : Colors.grey.shade600),
+                        ? Theme.of(context).canvasColor
+                        : textColor),
                   child: Container(
                     color: Colors.transparent,
                     child: FittedBox(
@@ -450,7 +452,7 @@ class _SudokuGameState extends State<SudokuGame> {
                   child: Text(
                     val.toString(),
                     style: DefaultTextStyle.of(context).style.apply(
-                      color: highlighted ? Colors.white : Colors.grey.shade600,
+                      color: highlighted ? Theme.of(context).canvasColor : textColor,
                       decoration: TextDecoration.none,
                     ),
                   ),
@@ -524,8 +526,8 @@ class _SudokuGameState extends State<SudokuGame> {
                   (index == 9) ? "X" : (index + 1).toString(),
                   style: TextStyle(
                     color: selectedIndex == index
-                        ? Colors.white
-                        : Colors.grey.shade600,
+                        ? Theme.of(context).canvasColor
+                        : Theme.of(context).textTheme.bodyMedium!.color!,
                   ),
                 ),
               ),
@@ -536,8 +538,8 @@ class _SudokuGameState extends State<SudokuGame> {
                 countString,
                 style: TextStyle(
                   color: selectedIndex == index
-                    ? Colors.white
-                    : Colors.grey.shade600,
+                    ? Theme.of(context).canvasColor
+                    : Theme.of(context).textTheme.bodyMedium!.color!,
                 ),
               ),
             ),
