@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sudoku/painters.dart';
 import 'package:sudoku/stack.dart';
 
 import 'package:sudoku_api/sudoku_api.dart';
@@ -384,8 +385,9 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
         });
       },
       child: GridTile(
-        child: Container(
-          decoration: BoxDecoration(border: border),
+        child: CustomPaint(
+          foregroundPainter: EdgePainter(border, x != boardLength - 1, y != boardLength - 1),
+          //decoration: BoxDecoration(border: border),
           child: Center(
             child: _buildGridItem(x, y),
           ),
@@ -398,8 +400,6 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
     if (_board == null) {
       return const SizedBox.shrink();
     }
-
-
 
     Cell cell = _board!.cellAt(Position(column: x, row: y));
 
