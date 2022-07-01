@@ -14,7 +14,8 @@ class LogoPainter extends CustomPainter {
 
     var paint = Paint()
       ..color = color
-      ..strokeWidth = stroke;
+      ..strokeWidth = stroke
+      ..isAntiAlias = true;
 
     // horizontal lines
     drawLineSmooth(canvas, paint, Offset(0, size.height / 3), Offset(size.width, size.height / 3));
