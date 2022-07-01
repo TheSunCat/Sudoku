@@ -345,12 +345,20 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
           _undoStack
               .push(Move(x, y, cell.getValue()!, List.from(cell.getMarkup()!)));
 
+          AnimationController animation = _scaleAnimationControllers[y * 9 + x];
+
           if (_selectedNumber != 10) {
             if (!_marking && cell.getValue() == _selectedNumber) {
-              _puzzle!.fillCell(pos, 0);
+              // wait for animation
+              Future.delayed(const Duration(milliseconds: 500), () {
+                _puzzle!.fillCell(pos, 0);
+              });
 
               _validationWrongCells.removeWhere(
                   (element) => (x == element.grid!.x && y == element.grid!.y));
+
+              animation.reset();
+              animation.reverse(from: 1.0);
 
             } else {
               if (_marking) {
@@ -358,14 +366,34 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                     (!cell.getMarkup()!.contains(_selectedNumber) &&
                         cell.getMarkup()!.length <= 8)) {
                   cell.addMarkup(_selectedNumber);
+
+                  animation.reset();
+                  animation.forward();
                 } else {
-                  cell.removeMarkup(_selectedNumber);
+                  Future.delayed(const Duration(milliseconds: 300), ()
+                  {
+                    cell.removeMarkup(_selectedNumber);
+
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      if (cell.getMarkup()!.isNotEmpty) {
+                      animation.reset();
+                      animation.forward();
+                      }
+                    });
+                  });
+
+                  animation.reset();
+                  animation.reverse(from: 1.0);
                 }
 
                 _puzzle!.fillCell(pos, 0);
+
               } else {
                 cell.clearMarkup();
                 _puzzle!.fillCell(pos, _selectedNumber);
+
+                animation.reset();
+                animation.forward();
               }
 
               _validationWrongCells.removeWhere(
@@ -380,10 +408,17 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
               });
             }
           } else if (!cell.prefill()!) {
-            cell.clearMarkup();
-            _puzzle!.fillCell(pos, 0);
+            // wait for animation
+            Future.delayed(const Duration(milliseconds: 500), () {
+              cell.clearMarkup();
+              _puzzle!.fillCell(pos, 0);
+            });
+
             _validationWrongCells.removeWhere(
                 (element) => (x == element.grid!.x && y == element.grid!.y));
+
+            animation.reset();
+            animation.reverse(from: 1.0);
           }
         });
       },
@@ -407,11 +442,13 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
       return const SizedBox.shrink();
     }
 
-    Cell cell = _board!.cellAt(Position(column: x, row: y));
+    Animation<double> animation = _scaleAnimations[y * 9 + x];
+    bool animating = !(animation.isDismissed || animation.isCompleted);
 
+    Cell cell = _board!.cellAt(Position(column: x, row: y));
     int val = cell.getValue()!;
 
-    if (val == 0 && !cell.markup()) {
+    if (!animating && val == 0 && !cell.markup()) {
       return const SizedBox.shrink();
     } // show nothing for empty cells
 
@@ -445,7 +482,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: ScaleTransition(
-        scale: _scaleAnimations[y * 9 + x],
+        scale: animation,
         alignment: Alignment.center,
         child: AnimatedContainer(
           curve: Curves.ease,
