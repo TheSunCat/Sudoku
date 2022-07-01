@@ -35,9 +35,6 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   late List<AnimationController> _scaleAnimationControllers;
   late List<Animation<double>> _scaleAnimations;
 
-  late List<AnimationController> _colorAnimationControllers;
-  late List<Animation<Color>?> _colorAnimations;
-
   late Timer refreshTimer;
   _SudokuGameState() : super() {
     // refresh the timer every second
@@ -57,13 +54,6 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
     _scaleAnimations = List.generate(9*9, (index) {
       return CurvedAnimation(parent: _scaleAnimationControllers[index], curve: Curves.bounceOut);
     });
-
-    // create animations for the grid, plus numbers, plus edit button
-    _colorAnimationControllers = List.generate(9*9 + 10 + 1, (index) {
-      return AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
-    });
-
-    _colorAnimations = List.generate(9*9 + 10 + 1, (index) => null);
   }
 
   @override
