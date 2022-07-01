@@ -35,6 +35,9 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   late List<AnimationController> _scaleAnimationControllers;
   late List<Animation<double>> _scaleAnimations;
 
+  late List<AnimationController> _colorAnimationControllers;
+  late List<Animation<Color>?> _colorAnimations;
+
   late Timer refreshTimer;
   _SudokuGameState() : super() {
     // refresh the timer every second
@@ -54,6 +57,13 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
     _scaleAnimations = List.generate(9*9, (index) {
       return CurvedAnimation(parent: _scaleAnimationControllers[index], curve: Curves.bounceOut);
     });
+
+    // create animations for the grid, plus numbers, plus edit button
+    _colorAnimationControllers = List.generate(9*9 + 10 + 1, (index) {
+      return AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
+    });
+
+    _colorAnimations = List.generate(9*9 + 10 + 1, (index) => null);
   }
 
   @override
@@ -233,22 +243,30 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: OutlinedButton(
-                              onPressed: () {
-                                // toggle marking mode
-                                setState(() => {_marking = !_marking});
-                              },
-                              style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
-                                    _marking ? Theme.of(context).primaryColor : null),
-                                foregroundColor: MaterialStateProperty.all(_marking
-                                    ? Theme.of(context).canvasColor
-                                    : null),
-                                shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(30.0))),
+                            child: AnimatedContainer(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(30),
+                                color: _marking ? Theme.of(context).primaryColor : Theme.of(context).canvasColor,
                               ),
-                              child: const Icon(Icons.edit),
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.ease,
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  // toggle marking mode
+                                  setState(() => {_marking = !_marking});
+                                },
+                                style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(
+                                     Colors.transparent),
+                                  foregroundColor: MaterialStateProperty.all(_marking
+                                      ? Theme.of(context).canvasColor
+                                      : Theme.of(context).primaryColor), // TODO should I use textColor for these?
+                                  shape: MaterialStateProperty.all(
+                                      RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(30.0))),
+                                ),
+                                child: const Icon(Icons.edit),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -427,7 +445,9 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
       child: ScaleTransition(
         scale: _scaleAnimations[y * 9 + x],
         alignment: Alignment.center,
-        child: Container(
+        child: AnimatedContainer(
+          curve: Curves.ease,
+          duration: const Duration(milliseconds: 200),
           width: double.infinity,
           height: double.infinity,
           decoration: BoxDecoration(
@@ -521,65 +541,73 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
     return Padding(
       padding: const EdgeInsets.all(4.0),
-      child: OutlinedButton(
-        onPressed: () {
-          setState(() {
-            if (_selectedNumber == index + 1) {
-              _selectedNumber = -1;
-            } else {
-              _selectedNumber = index + 1;
-            }
-          });
-        },
-        style: ButtonStyle(
-          shape: MaterialStateProperty.all(RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(300.0))),
-          backgroundColor: selectedIndex == index
-              ? MaterialStateProperty.all(Theme.of(context).primaryColor)
-              : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.ease,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(300),
+          color: selectedIndex == index
+              ? Theme.of(context).primaryColor
+              : Theme.of(context).canvasColor,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Expanded(
-              flex: 4,
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: Text(
-                  " ", // for spacing
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 6,
-              child: FittedBox(
-                fit: BoxFit.fill,
-                child: Text(
-                  (index == 9) ? "X" : (index + 1).toString(),
-                  style: TextStyle(
-                    color: selectedIndex == index
-                        ? Theme.of(context).canvasColor
-                        : Theme.of(context).textTheme.bodyMedium!.color!,
+        child: OutlinedButton(
+          onPressed: () {
+            setState(() {
+              if (_selectedNumber == index + 1) {
+                _selectedNumber = -1;
+              } else {
+                _selectedNumber = index + 1;
+              }
+            });
+          },
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(300.0))),
+            backgroundColor: MaterialStateProperty.all(Colors.transparent),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Expanded(
+                flex: 4,
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Text(
+                    " ", // for spacing
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Text(
-                countString,
-                style: TextStyle(
-                  color: selectedIndex == index
-                    ? Theme.of(context).canvasColor
-                    : Theme.of(context).textTheme.bodyMedium!.color!,
+              Expanded(
+                flex: 6,
+                child: FittedBox(
+                  fit: BoxFit.fill,
+                  child: Text(
+                    (index == 9) ? "X" : (index + 1).toString(),
+                    style: TextStyle(
+                      color: selectedIndex == index
+                          ? Theme.of(context).canvasColor
+                          : Theme.of(context).textTheme.bodyMedium!.color!,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            const Expanded(
-              flex: 1,
-              child: SizedBox.shrink()
-            ),
-          ],
+              Expanded(
+                flex: 3,
+                child: Text(
+                  countString,
+                  style: TextStyle(
+                    color: selectedIndex == index
+                      ? Theme.of(context).canvasColor
+                      : Theme.of(context).textTheme.bodyMedium!.color!,
+                  ),
+                ),
+              ),
+              const Expanded(
+                flex: 1,
+                child: SizedBox.shrink()
+              ),
+            ],
+          ),
         ),
       ),
     );
