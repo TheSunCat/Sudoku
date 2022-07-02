@@ -23,9 +23,9 @@ class Sudoku extends StatelessWidget {
     return DynamicColorTheme(
       data: (Color color, bool isDark) {
         return buildTheme(
-            color, isDark); // TODO define your own buildTheme method here
+            color, isDark);
       },
-      defaultColor: SystemTheme.accentColor.accent,//const Color.fromARGB(0xFF, 0xAA, 0x8E, 0xD6),
+      defaultColor: const Color.fromARGB(0xFF, 0xAA, 0x8E, 0xD6), // TODO maybe SystemTheme.accentColor.accent
       defaultIsDark: SystemTheme.isDarkMode,
       themedWidgetBuilder: (BuildContext context, ThemeData theme) {
         return MaterialApp(

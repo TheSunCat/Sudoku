@@ -16,6 +16,7 @@ dependencies:
   sudoku_api:
     path: external/sudoku_api
 
+  flutter_colorpicker: ^0.4.0
   dynamic_color_theme: ^2.0.0
   system_theme: ^2.0.0
 
