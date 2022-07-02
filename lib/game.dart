@@ -49,11 +49,13 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
     _scaleAnimationControllers = List.generate(9*9, (index) {
       return AnimationController(
-          duration: const Duration(milliseconds: 500), vsync: this, value: 0.1);
+          duration: const Duration(milliseconds: 500),
+          reverseDuration: const Duration(milliseconds: 200),
+          vsync: this, value: 0.1);
     });
 
     _scaleAnimations = List.generate(9*9, (index) {
-      return CurvedAnimation(parent: _scaleAnimationControllers[index], curve: Curves.bounceOut);
+      return CurvedAnimation(parent: _scaleAnimationControllers[index], curve: Curves.fastLinearToSlowEaseIn);
     });
   }
 
@@ -83,7 +85,10 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
           Random rand = Random();
 
           for(int i = 0; i < _scaleAnimationControllers.length; i++) {
-            Future.delayed(Duration(milliseconds: rand.nextInt(500)), () => _scaleAnimationControllers[i].forward());
+            Future.delayed(Duration(milliseconds: rand.nextInt(500)), () {
+              _scaleAnimationControllers[i].reset();
+              _scaleAnimationControllers[i].forward();
+            });
           }
         });
       });
@@ -350,8 +355,8 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
           if (_selectedNumber != 10) {
             if (!_marking && cell.getValue() == _selectedNumber) {
               // wait for animation
-              Future.delayed(const Duration(milliseconds: 500), () {
-                _puzzle!.fillCell(pos, 0);
+              Future.delayed(const Duration(milliseconds: 190), () {
+                setState(() => _puzzle!.fillCell(pos, 0));
               });
 
               _validationWrongCells.removeWhere(
@@ -370,20 +375,17 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                   animation.reset();
                   animation.forward();
                 } else {
-                  Future.delayed(const Duration(milliseconds: 300), ()
-                  {
-                    cell.removeMarkup(_selectedNumber);
-
-                    Future.delayed(const Duration(milliseconds: 500), () {
-                      if (cell.getMarkup()!.isNotEmpty) {
-                      animation.reset();
-                      animation.forward();
-                      }
-                    });
-                  });
-
                   animation.reset();
                   animation.reverse(from: 1.0);
+
+                  cell.removeMarkup(_selectedNumber);
+
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    if (cell.getMarkup()!.isNotEmpty) {
+                      animation.reset();
+                      animation.forward();
+                    }
+                  });
                 }
 
                 _puzzle!.fillCell(pos, 0);
@@ -448,7 +450,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
     Cell cell = _board!.cellAt(Position(column: x, row: y));
     int val = cell.getValue()!;
 
-    if (!animating && val == 0 && !cell.markup()) {
+    if ((cell.pristine()! && !cell.prefill()!) || (val == 0 && !cell.markup())) {
       return const SizedBox.shrink();
     } // show nothing for empty cells
 
@@ -470,38 +472,46 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
     if (_validationWrongCells
         .any((element) => ((element.grid!.x == x) && (element.grid!.y == y)))) {
-      itemColor = Colors.red; // TODO desaturate
+      itemColor = Colors.red.shade300;
       highlighted = true;
     }
 
     List<String> markup = List.generate(cell.getMarkup()!.length,
         (index) => cell.getMarkup()!.elementAt(index).toString());
 
-
-
     return Padding(
       padding: const EdgeInsets.all(4.0),
-      child: ScaleTransition(
-        scale: animation,
-        alignment: Alignment.center,
-        child: AnimatedContainer(
-          curve: Curves.ease,
-          duration: const Duration(milliseconds: 200),
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            color: itemColor, borderRadius: BorderRadius.circular(500)
-            //more than 50% of width makes circle
+      child: Stack(
+        children: [
+          ScaleTransition(
+            scale: animation,
+            alignment: Alignment.center,
+            child: AnimatedContainer(
+              curve: Curves.ease,
+              duration: const Duration(milliseconds: 100),
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                color: itemColor, borderRadius: BorderRadius.circular(500)
+                //more than 50% of width makes circle
+              ),
+              child: null,
+            ),
           ),
-          child: Center(
-            child: cell.markup()
-                ? DefaultTextStyle(
-                    style: DefaultTextStyle.of(context).style.apply(
-                      decoration: TextDecoration.none,
-                      color: highlighted
-                          ? Theme.of(context).canvasColor
-                          : textColor),
-                    child: Container(
+          AnimatedBuilder(
+            animation: animation,
+            builder: (context, child) => DefaultTextStyle(
+                style: DefaultTextStyle.of(context).style.apply(
+                    decoration: TextDecoration.none,
+                    color: highlighted
+                        ? ColorTween(begin: textColor, end: Theme.of(context).canvasColor)
+                        .animate(animation).value!
+                        : textColor),
+                child: child!
+            ),
+            child: Center(
+              child: cell.markup()
+                  ? Container(
                       color: Colors.transparent,
                       child: FittedBox(
                         fit: BoxFit.fill,
@@ -535,20 +545,19 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
-                    ),
-                  )
-                : FittedBox(
-                    fit: BoxFit.fill,
-                    child: Text(
-                      val.toString(),
-                      style: DefaultTextStyle.of(context).style.apply(
-                        color: highlighted ? Theme.of(context).canvasColor : textColor,
-                        decoration: TextDecoration.none,
+                    )
+                  : SizedBox(
+                    height: double.infinity,
+                    child: FittedBox(
+                        fit: BoxFit.fill,
+                        child: Text(
+                          val.toString(),
                       ),
                     ),
                   ),
+            ),
           ),
-        ),
+        ]
       ),
     );
   }
@@ -596,6 +605,26 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                 _selectedNumber = -1;
               } else {
                 _selectedNumber = index + 1;
+
+                // delay each by random amount for nice animation
+                Random rand = Random();
+
+                for (int x = 0; x < 9; x++) {
+                  for (int y = 0; y < 9; y++) {
+                    if (_board!.cellAt(Position(row: y, column: x))
+                        .getValue()! == _selectedNumber) {
+                      AnimationController animation = _scaleAnimationControllers[y * 9 + x];
+
+                      animation.reset();
+
+                      Future.delayed(Duration(milliseconds: rand.nextInt(200)), ()
+                      {
+                        animation.reset();
+                        animation.forward();
+                      });
+                    }
+                  }
+                }
               }
             });
           },
