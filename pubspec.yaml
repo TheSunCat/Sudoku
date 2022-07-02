@@ -20,6 +20,8 @@ dependencies:
   dynamic_color_theme: ^2.0.0
   system_theme: ^2.0.0
 
+  shared_preferences: ^2.0.15
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

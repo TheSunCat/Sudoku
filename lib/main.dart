@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sudoku/game.dart';
 import 'package:sudoku/painters.dart';
+import 'package:sudoku/save_manager.dart';
 import 'package:sudoku/theme.dart';
 import 'package:system_theme/system_theme.dart';
 
@@ -21,21 +22,19 @@ class Sudoku extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DynamicColorTheme(
-      data: (Color color, bool isDark) {
-        return buildTheme(
-            color, isDark);
-      },
-      defaultColor: const Color.fromARGB(0xFF, 0xAA, 0x8E, 0xD6), // TODO maybe SystemTheme.accentColor.accent
-      defaultIsDark: SystemTheme.isDarkMode,
-      themedWidgetBuilder: (BuildContext context, ThemeData theme) {
-        return MaterialApp(
-          title: 'Sudoku',
-          theme: theme,
-
-          home: const HomePage(),
-        );
-      }
-    );
+        data: (Color color, bool isDark) {
+          return buildTheme(color, isDark);
+        },
+        defaultColor: const Color.fromARGB(0xFF, 0xAA, 0x8E,
+            0xD6), // TODO maybe SystemTheme.accentColor.accent
+        defaultIsDark: SystemTheme.isDarkMode,
+        themedWidgetBuilder: (BuildContext context, ThemeData theme) {
+          return MaterialApp(
+            title: 'Sudoku',
+            theme: theme,
+            home: const HomePage(),
+          );
+        });
   }
 }
 
@@ -47,17 +46,25 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<String> _difficulties = [ "Beginner", "Easy", "Medium", "Hard", "Extreme" ];
-  int _difficulty = 2;
+  int _difficulty = 0;
   String _difficultyStr = "Medium";
+  bool _hasSave = false;
+
+  _HomePageState() {
+    // start at Medium
+    _updateDifficulty(2);
+  }
 
   void _updateDifficulty(int delta) {
-    setState(() {
-      // clamp difficulty within bounds of array
-      _difficulty = max(0, min(_difficulties.length - 1, _difficulty + delta));
+    // clamp difficulty within bounds of array
+    _difficulty = max(0, min(difficulties.length - 1, _difficulty + delta));
 
-      _difficultyStr = _difficulties[_difficulty];
-    });
+    Future<bool> saveFuture = SaveManager().saveExists(_difficulty);
+
+    saveFuture.then((value) => setState(() {
+      _difficultyStr = difficulties[_difficulty];
+      _hasSave = value;
+    }));
   }
 
   @override
@@ -67,7 +74,9 @@ class _HomePageState extends State<HomePage> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: DynamicColorTheme.of(context).isDark ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness: DynamicColorTheme.of(context).isDark
+            ? Brightness.light
+            : Brightness.dark,
         systemNavigationBarColor: Colors.transparent,
       ),
       child: Scaffold(
@@ -80,7 +89,8 @@ class _HomePageState extends State<HomePage> {
                   IconButton(
                     enableFeedback: false,
                     onPressed: null,
-                    icon: Icon(Icons.color_lens, color: Theme.of(context).canvasColor),
+                    icon: Icon(Icons.color_lens,
+                        color: Theme.of(context).canvasColor),
                   )
                 ],
               ),
@@ -89,9 +99,10 @@ class _HomePageState extends State<HomePage> {
                 children: <Widget>[
                   Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(500)
-                      //more than 50% of width makes circle
-                    ),
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(500)
+                        //more than 50% of width makes circle
+                        ),
                     child: Padding(
                       padding: const EdgeInsets.all(32.0),
                       child: CustomPaint(
@@ -105,11 +116,14 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      TextButton(onPressed: () {
+                      TextButton(
+                        onPressed: () {
                           _updateDifficulty(-1);
                         },
                         style: ButtonStyle(
-                          shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                          shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0))),
                         ),
                         child: const Icon(Icons.arrow_left),
                       ),
@@ -121,11 +135,14 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       ),
-                      TextButton(onPressed: () {
+                      TextButton(
+                        onPressed: () {
                           _updateDifficulty(1);
                         },
                         style: ButtonStyle(
-                          shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                          shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0))),
                         ),
                         child: const Icon(Icons.arrow_right),
                       ),
@@ -137,17 +154,45 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => SudokuGame(clues: (_difficulties.length - _difficulty) * 10)),
+                          MaterialPageRoute(
+                              builder: (context) => SudokuGame(
+                                  difficulty: _difficulty),
+                          ),
                         );
                       },
                       style: ButtonStyle(
-                        shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
-                        foregroundColor: MaterialStateProperty.all(Theme.of(context).textTheme.bodyMedium!.color!),
+                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.0))),
+                        foregroundColor: MaterialStateProperty.all(
+                            Theme.of(context).textTheme.bodyMedium!.color!),
                       ),
                       child: const Padding(
                         padding: EdgeInsets.all(16.0),
                         child: Text("New Game", style: TextStyle(fontSize: 20)),
                       ),
+                    ),
+                  ),
+                  OutlinedButton(
+                    onPressed: _hasSave ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                        builder: (context) => SudokuGame(
+                          difficulty: _difficulty,
+                          savedGame: SaveManager().load(_difficulty),
+                        ),
+                        ),
+                      );
+                    } : null,
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0))),
+                      foregroundColor: MaterialStateProperty.all(
+                          Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(_hasSave ? 1 : 0.5)),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text("Continue", style: TextStyle(fontSize: 20)),
                     ),
                   ),
                 ],
@@ -159,7 +204,8 @@ class _HomePageState extends State<HomePage> {
                     color: Theme.of(context).textTheme.bodyMedium!.color!,
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ColorSettings()),
+                      MaterialPageRoute(
+                          builder: (context) => const ColorSettings()),
                     ),
                     icon: const Icon(Icons.color_lens),
                   )

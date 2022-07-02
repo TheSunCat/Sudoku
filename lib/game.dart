@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:dynamic_color_theme/dynamic_color_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sudoku/painters.dart';
+import 'package:sudoku/save_manager.dart';
 import 'package:sudoku/stack.dart';
 
 import 'package:sudoku_api/sudoku_api.dart';
@@ -14,10 +16,19 @@ import 'custom_app_bar.dart';
 import 'fade_dialog.dart';
 import 'move.dart';
 
-class SudokuGame extends StatefulWidget {
-  final int clues;
+final List<String> difficulties = [
+  "Beginner",
+  "Easy",
+  "Medium",
+  "Hard",
+  "Extreme"
+];
 
-  const SudokuGame({Key? key, required this.clues}) : super(key: key);
+class SudokuGame extends StatefulWidget {
+  final int difficulty;
+  final Future<Puzzle>? savedGame;
+
+  const SudokuGame({Key? key, required this.difficulty, this.savedGame}) : super(key: key);
 
   @override
   State<SudokuGame> createState() => _SudokuGameState();
@@ -67,34 +78,55 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
     super.dispose();
 
     refreshTimer.cancel();
+    _puzzle?.dispose();
 
     for(int i = 0; i < _scaleAnimationControllers.length; i++) {
       _scaleAnimationControllers[i].dispose();
     }
   }
 
+  void onReady() {
+    _puzzle!.onBoardChange((cell) => {
+      SaveManager().save(widget.difficulty, _puzzle!)
+    });
+
+    _puzzle!.startStopwatch();
+
+    setState(() {
+      _board = _puzzle!.board()!;
+
+      Random rand = Random();
+
+      for(int i = 0; i < _scaleAnimationControllers.length; i++) {
+        Future.delayed(Duration(milliseconds: rand.nextInt(500)), () {
+          _scaleAnimationControllers[i].reset();
+          _scaleAnimationControllers[i].forward();
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_puzzle == null) {
-      _puzzle =
-          Puzzle(PuzzleOptions(patternName: "random", clues: widget.clues));
+      if(widget.savedGame == null) {
+        print("Generating new game");
 
-      _puzzle!.generate().then((_) {
-        _puzzle!.startStopwatch();
+        int clues = (difficulties.length - widget.difficulty) * 10;
 
-        setState(() {
-          _board = _puzzle!.board()!;
+        _puzzle = Puzzle(PuzzleOptions(patternName: "random", clues: clues));
 
-          Random rand = Random();
-
-          for(int i = 0; i < _scaleAnimationControllers.length; i++) {
-            Future.delayed(Duration(milliseconds: rand.nextInt(500)), () {
-              _scaleAnimationControllers[i].reset();
-              _scaleAnimationControllers[i].forward();
-            });
-          }
+        _puzzle!.generate().then((_) {
+          onReady();
         });
-      });
+      } else {
+        print("Using saved game");
+
+        widget.savedGame!.then((value) {
+          _puzzle = value;
+          onReady();
+        });
+      }
 
       /**
        * TODO is it safe to just carry on and access puzzle data,
@@ -737,7 +769,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("Difficulty: ${widget.clues}"),
+          Text("Difficulty: ${widget.difficulty}"),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

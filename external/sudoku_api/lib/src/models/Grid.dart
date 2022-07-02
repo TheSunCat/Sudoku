@@ -25,19 +25,19 @@ class Grid {
 
   /// Serialization
   ///
-  factory Grid.fromMap(Map<String, dynamic> map) {
+  factory Grid.fromJson(Map<String, dynamic> map) {
     return Grid._(
       map["matrix"] == null
           ? null
           : List<List<Cell>>.from(map["matrix"]
-              .map((x) => List<Cell>.from(x.map((x) => Cell.fromMap(x))))),
+              .map((x) => List<Cell>.from(x.map((x) => Cell.fromJson(x))))),
     );
   }
-  Map<String, dynamic> toMap() => {
+  Map<String, dynamic> toJson() => {
         "matrix": _matrix == null
             ? null
             : List<dynamic>.from(_matrix!
-                .map((x) => List<dynamic>.from(x.map((x) => x.toMap())))),
+                .map((x) => List<dynamic>.from(x.map((x) => x.toJson())))),
       };
 
   /// Constructs a matrix of cells whose value is all empty

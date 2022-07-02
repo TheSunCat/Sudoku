@@ -48,7 +48,7 @@ class Cell extends ICell {
 
   /// Serialization
   ///
-  factory Cell.fromMap(Map<String, dynamic> json) => Cell._(
+  factory Cell.fromJson(Map<String, dynamic> json) => Cell._(
         value: json["value"] == null ? null : json["value"],
         isPrefill: json["is_prefill"] == null ? null : json["is_prefill"],
         isValid: json["is_valid"] == null ? null : json["is_valid"],
@@ -56,16 +56,16 @@ class Cell extends ICell {
         isPristine: json["is_pristine"] == null ? null : json["is_pristine"],
         position: json["position"] == null
             ? null
-            : Position.fromMap(json["position"]),
+            : Position.fromJson(json["position"]),
       );
 
-  Map<String, dynamic> toMap() => {
+  Map<String, dynamic> toJson() => {
         "value": _value == null ? null : _value,
         "is_prefill": _isPrefill == null ? null : _isPrefill,
         "is_valid": _isValid == null ? null : _isValid,
         "markup": _markup == null ? null : _markup,
         "is_pristine": isPristine == null ? null : isPristine,
-        "position": position == null ? null : position!.toMap(),
+        "position": position == null ? null : position!.toJson(),
       };
 
   /// Sets [value] of cell while poking [_onChange]
