@@ -758,6 +758,8 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   }
 
   void win(BuildContext context) {
+    SaveManager().clear(widget.difficulty);
+
     _puzzle!.stopStopwatch();
 
     List<String> winStrings = ["You win!", "Great job!", "Impressive.", "EYYYYYYYY"];

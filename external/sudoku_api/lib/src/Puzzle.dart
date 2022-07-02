@@ -38,7 +38,7 @@ class Puzzle {
     _patterner = new Patterner();
   }
 
-  /// Private constructor - For when using [Puzzle.fromJson] to get a previously generated puzzle
+  /// Private constructor - For when using [Puzzle.fromMap] to get a previously generated puzzle
   Puzzle._({
     Grid? board,
     Grid? solvedBoard,
@@ -59,24 +59,24 @@ class Puzzle {
 
   /// Serialization
   ///
-  factory Puzzle.fromJson(Map<String, dynamic> map) {
+  factory Puzzle.fromMap(Map<String, dynamic> map) {
     if (!map.containsKey('board') ||
         !map.containsKey('options') ||
         !map.containsKey('solved_board')) {
       throw ('Missing board or options in the map');
     }
     return Puzzle._(
-        board: Grid.fromJson(map['board']),
-        solvedBoard: Grid.fromJson(map['solved_board']),
-        options: PuzzleOptions.fromJson(map['options']),
+        board: Grid.fromMap(map['board']),
+        solvedBoard: Grid.fromMap(map['solved_board']),
+        options: PuzzleOptions.fromMap(map['options']),
         timeElapsedInSeconds: map['time_elapsed_in_seconds']);
   }
-  Map<String, dynamic> toJson() => {
-        "board": board() == null ? null : board()!.toJson(),
+  Map<String, dynamic> toMap() => {
+        "board": board() == null ? null : board()!.toMap(),
         "solved_board": _solver.solvedBoard() == null
             ? null
-            : _solver.solvedBoard()!.toJson(),
-        "options": options() == null ? null : options()!.toJson(),
+            : _solver.solvedBoard()!.toMap(),
+        "options": options() == null ? null : options()!.toMap(),
         "time_elapsed_in_seconds": getTimeElapsed().inSeconds
       };
 

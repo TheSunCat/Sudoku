@@ -16,12 +16,12 @@ class PuzzleOptions {
 
   /// Serialization
   ///
-  factory PuzzleOptions.fromJson(Map<String, dynamic> json) => PuzzleOptions(
+  factory PuzzleOptions.fromMap(Map<String, dynamic> json) => PuzzleOptions(
         name: json["name"] == null ? null : json["name"],
         clues: json["clues"] == null ? null : json["clues"],
         patternName: json["pattern_name"] == null ? null : json["pattern_name"],
       );
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toMap() => {
         "name": name == null ? null : name,
         "clues": clues == null ? null : clues,
         "pattern_name": patternName == null ? null : patternName,

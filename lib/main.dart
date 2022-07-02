@@ -151,14 +151,15 @@ class _HomePageState extends State<HomePage> {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.push(
+                      onPressed: () async {
+                        final temp = await Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => SudokuGame(
                                   difficulty: _difficulty),
                           ),
                         );
+                        setState(() => _updateDifficulty(0));
                       },
                       style: ButtonStyle(
                         shape: MaterialStateProperty.all(RoundedRectangleBorder(
@@ -173,16 +174,17 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   OutlinedButton(
-                    onPressed: _hasSave ? () {
-                      Navigator.push(
+                    onPressed: _hasSave ? () async {
+                      final temp = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                        builder: (context) => SudokuGame(
-                          difficulty: _difficulty,
-                          savedGame: SaveManager().load(_difficulty),
-                        ),
+                          builder: (context) => SudokuGame(
+                            difficulty: _difficulty,
+                            savedGame: SaveManager().load(_difficulty),
+                          ),
                         ),
                       );
+                      setState(() => _updateDifficulty(0));
                     } : null,
                     style: ButtonStyle(
                       shape: MaterialStateProperty.all(RoundedRectangleBorder(

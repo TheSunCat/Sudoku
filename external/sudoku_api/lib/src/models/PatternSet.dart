@@ -118,10 +118,10 @@ class PatternSet<Pattern> extends DelegatingList<MY.Pattern> {
   Tuple2<bool, List<String>> _checkValidPatternMap(Map<int, String>? map) {
     String _patrow = "";
     String _bigrow = "";
-    List<String> _reasons = new List<String>.empty();
+    List<String> _reasons = new List<String>.empty(growable: true);
 
     for (int row = 0; row < 9; row++) {
-      _patrow = map![row]!.replaceAll(' ', '');
+      _patrow = map![row]?.replaceAll(' ', '')??"0";
 
       if (_patrow.length != 9) {
         _reasons.add("Pattern Map row #$row does not " +

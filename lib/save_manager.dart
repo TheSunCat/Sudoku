@@ -25,15 +25,20 @@ class SaveManager {
   void save(int difficulty, Puzzle data) async {
     final SharedPreferences prefs = await _prefs;
 
-    await prefs.setString("board$difficulty", json.encode(data));
+    await prefs.setString("board$difficulty", json.encode(data.toMap()));
   }
 
   Future<Puzzle> load(int difficulty) async {
     final SharedPreferences prefs = await _prefs;
 
     String jsonData = prefs.getString("board$difficulty")!;
-    log(jsonData);
 
-    return json.decode(jsonData);
+    return Puzzle.fromMap(json.decode(jsonData));
+  }
+
+  void clear(int difficulty) async {
+    final SharedPreferences prefs = await _prefs;
+
+    prefs.remove("board$difficulty");
   }
 }
