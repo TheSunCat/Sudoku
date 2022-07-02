@@ -1,32 +1,15 @@
 import 'dart:math';
 
+import 'package:dynamic_color_theme/dynamic_color_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sudoku/game.dart';
 import 'package:sudoku/painters.dart';
+import 'package:sudoku/theme.dart';
+import 'package:system_theme/system_theme.dart';
 
 void main() {
   runApp(const Sudoku());
-}
-
-MaterialColor buildMaterialColor(Color color) {
-  List strengths = <double>[.05];
-  Map<int, Color> swatch = {};
-  final int r = color.red, g = color.green, b = color.blue;
-
-  for (int i = 1; i < 10; i++) {
-    strengths.add(0.1 * i);
-  }
-  strengths.forEach((strength) {
-    final double ds = 0.5 - strength;
-    swatch[(strength * 1000).round()] = Color.fromRGBO(
-      r + ((ds < 0 ? r : (255 - r)) * ds).round(),
-      g + ((ds < 0 ? g : (255 - g)) * ds).round(),
-      b + ((ds < 0 ? b : (255 - b)) * ds).round(),
-      1,
-    );
-  });
-  return MaterialColor(color.value, swatch);
 }
 
 class Sudoku extends StatelessWidget {
@@ -35,13 +18,21 @@ class Sudoku extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sudoku',
-      theme: ThemeData(
-        primarySwatch: buildMaterialColor(const Color.fromARGB(0xFF, 0xAA, 0x8E, 0xD6)),
-        textTheme: TextTheme(bodyMedium: TextStyle(color: Colors.grey.shade600)),
-      ),
-      home: const HomePage(),
+    return DynamicColorTheme(
+      data: (Color color, bool isDark) {
+        return buildTheme(
+            color, isDark); // TODO define your own buildTheme method here
+      },
+      defaultColor: SystemTheme.accentColor.accent,//const Color.fromARGB(0xFF, 0xAA, 0x8E, 0xD6),
+      defaultIsDark: SystemTheme.isDarkMode,
+      themedWidgetBuilder: (BuildContext context, ThemeData theme) {
+        return MaterialApp(
+          title: 'Sudoku',
+          theme: theme,
+
+          home: const HomePage(),
+        );
+      }
     );
   }
 }
@@ -137,8 +128,12 @@ class _HomePageState extends State<HomePage> {
                     },
                     style: ButtonStyle(
                       shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                      foregroundColor: MaterialStateProperty.all(Theme.of(context).textTheme.bodyMedium!.color!)
                     ),
-                    child: const Text("New Game")
+                    child: const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text("New Game", style: TextStyle(fontSize: 20)),
+                    ),
                 ),
               ),
             ],

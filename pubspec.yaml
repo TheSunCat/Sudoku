@@ -16,6 +16,9 @@ dependencies:
   sudoku_api:
     path: external/sudoku_api
 
+  dynamic_color_theme: ^2.0.0
+  system_theme: ^2.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

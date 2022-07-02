@@ -8,6 +8,8 @@ import 'package:sudoku/stack.dart';
 
 import 'package:sudoku_api/sudoku_api.dart';
 
+import 'color_settings.dart';
+import 'custom_app_bar.dart';
 import 'fade_dialog.dart';
 import 'move.dart';
 
@@ -115,23 +117,15 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
         body: SafeArea(
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                      color: Theme.of(context).textTheme.bodyMedium!.color!,
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back)
+              makeAppBar(context, timeString,
+                IconButton(
+                  color: Theme.of(context).textTheme.bodyMedium!.color!,
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ColorSettings()),
                   ),
-                  Text(timeString, style: Theme.of(context).textTheme.bodyMedium),
-                  IconButton( // place secret icon to center text
-                    enableFeedback: false,
-                    color: Theme.of(context).canvasColor,
-                    onPressed: () => {},
-                    icon: const Icon(Icons.arrow_forward),
-                    splashRadius: 1,
-                  ),
-                ],
+                  icon: const Icon(Icons.color_lens),
+                )
               ),
               Expanded(
                 child: Column(
@@ -323,12 +317,12 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
     // not my best code...
     Border border = Border(
       right: ((x % sectorLength == sectorLength - 1) && (x != boardLength - 1))
-          ? BorderSide(width: 2.0, color: Theme.of(context).indicatorColor)
+          ? BorderSide(width: 2.0, color: Theme.of(context).primaryColor)
           : ((x == boardLength - 1)
               ? BorderSide.none
               : BorderSide(width: 1.0, color: Theme.of(context).dividerColor)),
       bottom: ((y % sectorLength == sectorLength - 1) && (y != boardLength - 1))
-          ? BorderSide(width: 2.0, color: Theme.of(context).indicatorColor)
+          ? BorderSide(width: 2.0, color: Theme.of(context).primaryColor)
           : ((y == boardLength - 1)
               ? BorderSide.none
               : BorderSide(width: 1.0, color: Theme.of(context).dividerColor)),
@@ -483,7 +477,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
         (index) => cell.getMarkup()!.elementAt(index).toString());
 
     return Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.all(5.0),
       child: Stack(
         children: [
           ScaleTransition(

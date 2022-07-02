@@ -4,7 +4,9 @@ void fadeDialog(BuildContext context, String content, String no, String yes, voi
 {
   fadePopup(context, AlertDialog(
     //title: Text(title),
-    content: Text(content),
+    content: Text(content,
+      style: Theme.of(context).textTheme.bodyMedium,
+    ),
     actions: <Widget>[
       TextButton(
           onPressed: () {
