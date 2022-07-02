@@ -336,12 +336,15 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
     return GestureDetector(
       onTap: () {
+        if (_puzzle!.board() == null) {
+          return;
+        }
+
         Position pos = Position(row: y, column: x);
         Cell cell = _board!.cellAt(pos);
 
-        if (_selectedNumber == -1 ||
-            _puzzle!.board() == null ||
-            cell.prefill()!) {
+        if(_selectedNumber == -1 || cell.prefill()!) {
+          numberButtonPressed(cell.getValue()! - 1);
           return;
         }
 
@@ -600,33 +603,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
         ),
         child: OutlinedButton(
           onPressed: () {
-            setState(() {
-              if (_selectedNumber == index + 1) {
-                _selectedNumber = -1;
-              } else {
-                _selectedNumber = index + 1;
-
-                // delay each by random amount for nice animation
-                Random rand = Random();
-
-                for (int x = 0; x < 9; x++) {
-                  for (int y = 0; y < 9; y++) {
-                    if (_board!.cellAt(Position(row: y, column: x))
-                        .getValue()! == _selectedNumber) {
-                      AnimationController animation = _scaleAnimationControllers[y * 9 + x];
-
-                      animation.reset();
-
-                      Future.delayed(Duration(milliseconds: rand.nextInt(200)), ()
-                      {
-                        animation.reset();
-                        animation.forward();
-                      });
-                    }
-                  }
-                }
-              }
-            });
+            numberButtonPressed(index);
           },
           style: ButtonStyle(
             shape: MaterialStateProperty.all(RoundedRectangleBorder(
@@ -679,6 +656,36 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  void numberButtonPressed(int index) {
+    setState(() {
+      if (_selectedNumber == index + 1) {
+        _selectedNumber = -1;
+      } else {
+        _selectedNumber = index + 1;
+
+        // delay each by random amount for nice animation
+        Random rand = Random();
+
+        for (int x = 0; x < 9; x++) {
+          for (int y = 0; y < 9; y++) {
+            if (_board!.cellAt(Position(row: y, column: x))
+                .getValue()! == _selectedNumber) {
+              AnimationController animation = _scaleAnimationControllers[y * 9 + x];
+
+              animation.reset();
+
+              Future.delayed(Duration(milliseconds: rand.nextInt(200)), ()
+              {
+                animation.reset();
+                animation.forward();
+              });
+            }
+          }
+        }
+      }
+    });
   }
 
   Future<bool> isBoardSolved() async {
