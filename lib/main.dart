@@ -8,6 +8,8 @@ import 'package:sudoku/painters.dart';
 import 'package:sudoku/theme.dart';
 import 'package:system_theme/system_theme.dart';
 
+import 'color_settings.dart';
+
 void main() {
   runApp(const Sudoku());
 }
@@ -63,78 +65,105 @@ class _HomePageState extends State<HomePage> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark, // dark text for status bar
+        statusBarIconBrightness: DynamicColorTheme.of(context).isDark ? Brightness.light : Brightness.dark,
         systemNavigationBarColor: Colors.transparent,
       ),
       child: Scaffold(
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(500)
-                  //more than 50% of width makes circle
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: CustomPaint(
-                    size: Size(screenWidth * .50, screenWidth * .50),
-                    painter: LogoPainter(Theme.of(context).canvasColor),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 50),
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextButton(onPressed: () {
-                      _updateDifficulty(-1);
-                    },
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                  IconButton(
+                    enableFeedback: false,
+                    onPressed: null,
+                    icon: Icon(Icons.color_lens, color: Theme.of(context).canvasColor),
+                  )
+                ],
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(500)
+                      //more than 50% of width makes circle
                     ),
-                    child: const Icon(Icons.arrow_left),
-                  ),
-                  SizedBox(
-                    width: 100,
-                    child: Center(
-                      child: Text(
-                        _difficultyStr,
+                    child: Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: CustomPaint(
+                        size: Size(screenWidth * .50, screenWidth * .50),
+                        painter: LogoPainter(Theme.of(context).canvasColor),
                       ),
                     ),
                   ),
-                  TextButton(onPressed: () {
-                      _updateDifficulty(1);
-                    },
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                  const SizedBox(height: 50),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(onPressed: () {
+                          _updateDifficulty(-1);
+                        },
+                        style: ButtonStyle(
+                          shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                        ),
+                        child: const Icon(Icons.arrow_left),
+                      ),
+                      SizedBox(
+                        width: 100,
+                        child: Center(
+                          child: Text(
+                            _difficultyStr,
+                          ),
+                        ),
+                      ),
+                      TextButton(onPressed: () {
+                          _updateDifficulty(1);
+                        },
+                        style: ButtonStyle(
+                          shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                        ),
+                        child: const Icon(Icons.arrow_right),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SudokuGame(clues: (_difficulties.length - _difficulty) * 10)),
+                        );
+                      },
+                      style: ButtonStyle(
+                        shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                        foregroundColor: MaterialStateProperty.all(Theme.of(context).textTheme.bodyMedium!.color!),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text("New Game", style: TextStyle(fontSize: 20)),
+                      ),
                     ),
-                    child: const Icon(Icons.arrow_right),
                   ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SudokuGame(clues: (_difficulties.length - _difficulty) * 10)),
-                      );
-                    },
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
-                      foregroundColor: MaterialStateProperty.all(Theme.of(context).textTheme.bodyMedium!.color!)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    color: Theme.of(context).textTheme.bodyMedium!.color!,
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ColorSettings()),
                     ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text("New Game", style: TextStyle(fontSize: 20)),
-                    ),
-                ),
+                    icon: const Icon(Icons.color_lens),
+                  )
+                ],
               ),
             ],
           ),

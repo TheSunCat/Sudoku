@@ -15,62 +15,84 @@ class _ColorSettingsState extends State<ColorSettings> {
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark, // dark text for status bar
+        statusBarIconBrightness: DynamicColorTheme.of(context).isDark ? Brightness.light : Brightness.dark,
         systemNavigationBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        body: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              makeAppBar(context, "Color Settings", null),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 150.0),
+        body: SafeArea(
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                makeAppBar(context, "Color Settings", null),
+                Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("Primary color:\t\t\t"),
+                          const Expanded(
+                            flex: 1,
+                            child: SizedBox.shrink(),
+                          ),
+                          const Expanded(
+                            flex: 3,
+                            child: Text("Primary color:\t\t\t"),
+                          ),
 
-                          OutlinedButton(
-                            onPressed: () => showDialog(context: context, builder: (context) => AlertDialog(
-                              title: const Text("Pick a primary color:"),
-                              content: SingleChildScrollView(
-                                child: ColorPicker(
-                                  enableAlpha: false,
-                                  pickerAreaBorderRadius: BorderRadius.circular(500),
-                                  showLabel: false,
-                                  pickerColor: Theme.of(context).primaryColor,
-                                  onColorChanged: (Color value) => DynamicColorTheme.of(context).setColor(color: value, shouldSave: true),
+                          Expanded(
+                            flex: 3,
+                            child: OutlinedButton(
+                              onPressed: () => showDialog(context: context, builder: (context) => AlertDialog(
+                                title: const Text("Pick a primary color:"),
+                                content: SingleChildScrollView(
+                                  child: ColorPicker(
+                                    enableAlpha: false,
+                                    pickerAreaBorderRadius: BorderRadius.circular(10),
+                                    showLabel: false,
+                                    pickerColor: Theme.of(context).primaryColor,
+                                    onColorChanged: (Color value) => DynamicColorTheme.of(context).setColor(color: value, shouldSave: true),
+                                  ),
                                 ),
+                              )),
+                              style: ButtonStyle(
+                                shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
+                                backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor),
+                                surfaceTintColor: MaterialStateProperty.all(Colors.red),
+                                shadowColor: MaterialStateProperty.all(Colors.red),
+                                enableFeedback: false,
                               ),
-                            )),
-                            style: ButtonStyle(
-                              shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
-                              backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor),
-                              surfaceTintColor: MaterialStateProperty.all(Colors.red),
-                              shadowColor: MaterialStateProperty.all(Colors.red),
-                              enableFeedback: false,
+                              child: const SizedBox(
+                                width: 64,
+                                height: 64,
+                              ),
                             ),
-                            child: const SizedBox(
-                              width: 64,
-                              height: 64,
-                            ),
+                          ),
+                          const Expanded(
+                            flex: 1,
+                            child: SizedBox.shrink(),
                           ),
                         ]
                       ),
                       const SizedBox(height:25),
                       Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text("Dark theme:\t\t\t"),
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Expanded(
+                            flex: 1,
+                            child: SizedBox.shrink(),
+                          ),
+                          const Expanded(
+                            flex: 3,
+                            child: Text("Dark theme:\t\t\t")
+                          ),
 
-                            OutlinedButton(
+                          Expanded(
+                            flex: 3,
+                            child: OutlinedButton(
                               onPressed: () => DynamicColorTheme.of(context).setIsDark(isDark: !DynamicColorTheme.of(context).isDark, shouldSave: true),
                               style: ButtonStyle(
                                 shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
@@ -83,13 +105,18 @@ class _ColorSettingsState extends State<ColorSettings> {
                                 child: Icon(Icons.dark_mode)
                               ),
                             ),
-                          ]
+                          ),
+                          const Expanded(
+                            flex: 1,
+                            child: SizedBox.shrink(),
+                          ),
+                        ]
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       )

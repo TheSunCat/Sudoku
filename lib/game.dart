@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:dynamic_color_theme/dynamic_color_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sudoku/painters.dart';
@@ -108,9 +109,9 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark, // dark text for status bar
+        statusBarIconBrightness: DynamicColorTheme.of(context).isDark ? Brightness.light : Brightness.dark,
         systemNavigationBarColor: Colors.transparent,
       ),
       child: Scaffold(
@@ -122,7 +123,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                   color: Theme.of(context).textTheme.bodyMedium!.color!,
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ColorSettings()),
+                    MaterialPageRoute(builder: (context) => const ColorSettings()),
                   ),
                   icon: const Icon(Icons.color_lens),
                 )

@@ -11,17 +11,16 @@ ThemeData buildTheme(Color accentColor, bool isDark) {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: ButtonStyle(
         foregroundColor: MaterialStateProperty.all(accentColor),
-        surfaceTintColor: MaterialStateProperty.all(Colors.red),
-        //overlayColor: MaterialStateProperty.all(Colors.red),
+        overlayColor: MaterialStateProperty.all(accentColor.withOpacity(0.2)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: ButtonStyle(
-          foregroundColor: MaterialStateProperty.all(accentColor)
+        foregroundColor: MaterialStateProperty.all(accentColor),
+        overlayColor: MaterialStateProperty.all(accentColor.withOpacity(0.2)),
       )
     ),
     primaryColor: accentColor,
-    //highlightColor: Colors.red,
     scaffoldBackgroundColor: canvasColor,
     textTheme: _buildTextTheme(base.textTheme, isDark),
   );
