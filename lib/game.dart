@@ -128,11 +128,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
         });
       }
 
-      /**
-       * TODO is it safe to just carry on and access puzzle data,
-       * despite it not being generated yet?
-       * Dunno about you, but sounds like a recipe for disaster to me.
-       */
+      return const SizedBox.shrink();
     }
 
     const int boardLength = 9;
@@ -761,30 +757,48 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
     SaveManager().clear(widget.difficulty);
 
     _puzzle!.stopStopwatch();
+    String timeString = timeToString(_puzzle!.getTimeElapsed());
 
-    List<String> winStrings = ["You win!", "Great job!", "Impressive.", "EYYYYYYYY"];
+    // funny random win string generation
+    Random rand = Random();
 
-    int rand = Random().nextInt(winStrings.length);
+    List<String> winStrings = [
+      "You win!", "Congration, you done it!", "Great job!", "Impressive.",
+      "EYYYYYYYY!", "All our base are belong to you.", "You're winner!",
+      "A winner is you!", "A ADJECTIVE game."];
+
+    // make the last entry very likely
+    int winStringIndex = rand.nextInt(winStrings.length * 2).clamp(0, winStrings.length - 1);
+    String winString = winStrings[winStringIndex];
+
+    List<String> adjectives = [
+      " charming", " determined", " fabulous", " dynamic", "n imaginative",
+      " breathtaking", " brilliant", "n elegant", " lovely", " spectacular"
+    ];
+
+    winString.replaceAll(" ADJECTIVE", adjectives[rand.nextInt(adjectives.length)]);
 
     fadePopup(context, AlertDialog(
-      title: Center(child: Text(winStrings[rand])),
+      title: Center(child: Text(winString)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("Difficulty: ${widget.difficulty}"),
+          Text("Difficulty: ${difficulties[widget.difficulty]}"),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text("Validations used: $_validations"),
             ],
           ),
-          Text("Time: ${timeToString(_puzzle!.getTimeElapsed())}"),
+          Text("Time: $timeString"),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 16.0, 0, 0),
             child: OutlinedButton(
               onPressed: () {
-                // TODO is this a good idea/allowed? How else do I pop twice?
+                // clear save again for good measure
+                SaveManager().clear(widget.difficulty);
 
+                // TODO is this a good idea/allowed? How else do I pop twice?
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
