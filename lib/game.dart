@@ -765,7 +765,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
     List<String> winStrings = [
       "You win!", "Congration, you done it!", "Great job!", "Impressive.",
       "EYYYYYYYY!", "All our base are belong to you.", "You're winner!",
-      "A winner is you!", "A ADJECTIVE game."];
+      "A winner is you!", "A ADJECTIVE game!"];
 
     // make the last entry very likely
     int winStringIndex = rand.nextInt(winStrings.length * 2).clamp(0, winStrings.length - 1);
@@ -773,10 +773,12 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
     List<String> adjectives = [
       " charming", " determined", " fabulous", " dynamic", "n imaginative",
-      " breathtaking", " brilliant", "n elegant", " lovely", " spectacular"
+      " breathtaking", " brilliant", "n elegant", " lovely", " spectacular",
+      "n internet-worthy", " screenshot-worthy", " duck-like", "n explosive",
+      " devious", " excellent", " concise"
     ];
 
-    winString.replaceAll(" ADJECTIVE", adjectives[rand.nextInt(adjectives.length)]);
+    winString = winString.replaceAll(" ADJECTIVE", adjectives[rand.nextInt(adjectives.length)]);
 
     fadePopup(context, AlertDialog(
       title: Center(child: Text(winString)),
