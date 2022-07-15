@@ -153,7 +153,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const ColorSettings()),
-                    ).then((value) => _puzzle?.startStopwatch());
+                    ).then((value) => setState(() => _puzzle?.startStopwatch()));
                   },
                   icon: const Icon(Icons.color_lens),
                 )
@@ -435,7 +435,6 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
               Future<bool> solved = isBoardSolved();
               solved.then((value) {
-
                 if (value) {
                   win(context);
                 }
