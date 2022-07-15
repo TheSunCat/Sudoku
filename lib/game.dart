@@ -1,13 +1,14 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
+import 'package:intl/intl.dart';
 import 'package:dynamic_color_theme/dynamic_color_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sudoku/painters.dart';
 import 'package:sudoku/save_manager.dart';
 import 'package:sudoku/stack.dart';
+import 'package:sudoku/util.dart';
 
 import 'package:sudoku_api/sudoku_api.dart';
 
@@ -110,8 +111,6 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     if (_puzzle == null) {
       if(widget.savedGame == null) {
-        print("Generating new game");
-
         int clues = (difficulties.length - widget.difficulty) * 10;
 
         _puzzle = Puzzle(PuzzleOptions(patternName: "random", clues: clues));
@@ -120,8 +119,6 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
           onReady();
         });
       } else {
-        print("Using saved game");
-
         widget.savedGame!.then((value) {
           _puzzle = value;
           onReady();
@@ -149,10 +146,15 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
               makeAppBar(context, timeString,
                 IconButton(
                   color: Theme.of(context).textTheme.bodyMedium!.color!,
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ColorSettings()),
-                  ),
+                  onPressed: () {
+                    // stop the timer while color settings are changed
+                    _puzzle?.stopStopwatch();
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ColorSettings()),
+                    ).then((value) => _puzzle?.startStopwatch());
+                  },
                   icon: const Icon(Icons.color_lens),
                 )
               ),
@@ -223,6 +225,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                                 shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(30.0))),
+                                side: MaterialStateProperty.all(const BorderSide(color: Colors.transparent)),
                               ),
                               child: const Icon(Icons.refresh),
                             ),
@@ -259,6 +262,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                                 shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(30.0))),
+                                side: MaterialStateProperty.all(const BorderSide(color: Colors.transparent)),
                               ),
                               child: const Icon(Icons.check),
                             ),
@@ -286,6 +290,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                                   shape: MaterialStateProperty.all(
                                       RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(30.0))),
+                                  side: MaterialStateProperty.all(const BorderSide(color: Colors.transparent)),
                                 ),
                                 child: const Icon(Icons.edit),
                               ),
@@ -317,6 +322,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                                 shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(30.0))),
+                                side: MaterialStateProperty.all(const BorderSide(color: Colors.transparent)),
                               ),
                               child: const Icon(Icons.undo),
                             ),
@@ -734,85 +740,144 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
     return true;
   }
 
-  String timeToString(Duration time) {
-    String timeString = "";
-
-    if (time.inDays != 0) {
-      timeString += "${time.inDays}D ";
-    }
-    if (time.inHours != 0) {
-      timeString += "${time.inHours % 24}H ";
-    }
-    if (time.inMinutes != 0) {
-      timeString += "${time.inMinutes % 60}M ";
-    }
-    if (time.inSeconds != 0) {
-      timeString += "${time.inSeconds % 60}S";
-    }
-
-    return timeString;
-  }
-
   void win(BuildContext context) {
-    SaveManager().clear(widget.difficulty);
+    SaveManager().getScores(widget.difficulty).then(
+      (List<Score> scores) => setState(
+        () {
+          SaveManager().clear(widget.difficulty);
 
-    _puzzle!.stopStopwatch();
-    String timeString = timeToString(_puzzle!.getTimeElapsed());
+          // record the new score
+          SaveManager().recordScore(
+              _puzzle!.getTimeElapsed(), widget.difficulty);
 
-    // funny random win string generation
-    Random rand = Random();
+          // also add it to our local list
+          DateTime now = DateTime.now();
+          scores.add(Score(_puzzle!.getTimeElapsed(), "${now.day} ${DateFormat.yMMM().format(now)}"));
+          scores.sort((a, b) => a.time.compareTo(b.time));
 
-    List<String> winStrings = [
-      "You win!", "Congration, you done it!", "Great job!", "Impressive.",
-      "EYYYYYYYY!", "All our base are belong to you.", "You're winner!",
-      "A winner is you!", "A ADJECTIVE game!"];
+          if (scores.length > 10) {
+            scores.removeRange(9, scores.length - 1);
+          }
 
-    // make the last entry very likely
-    int winStringIndex = rand.nextInt(winStrings.length * 2).clamp(0, winStrings.length - 1);
-    String winString = winStrings[winStringIndex];
+          _puzzle!.stopStopwatch();
+          String timeString = timeToString(_puzzle!.getTimeElapsed());
 
-    List<String> adjectives = [
-      " charming", " determined", " fabulous", " dynamic", "n imaginative",
-      " breathtaking", " brilliant", "n elegant", " lovely", " spectacular",
-      "n internet-worthy", " screenshot-worthy", " duck-like", "n explosive",
-      " devious", " excellent", " concise"
-    ];
+          print("Saved scores: $scores");
 
-    winString = winString.replaceAll(" ADJECTIVE", adjectives[rand.nextInt(adjectives.length)]);
+          // funny random win string generation
+          Random rand = Random();
 
-    fadePopup(context, AlertDialog(
-      title: Center(child: Text(winString)),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text("Difficulty: ${difficulties[widget.difficulty]}"),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Validations used: $_validations"),
-            ],
-          ),
-          Text("Time: $timeString"),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 16.0, 0, 0),
-            child: OutlinedButton(
-              onPressed: () {
-                // clear save again for good measure
-                SaveManager().clear(widget.difficulty);
+          List<String> winStrings = [
+            "You win!", "Congration, you done it!", "Great job!", "Impressive.",
+            "EYYYYYYYY!", "All our base are belong to you.", "You're winner!",
+            "A winner is you!", "A ADJECTIVE game!"];
 
-                // TODO is this a good idea/allowed? How else do I pop twice?
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
-              ),
-              child: const Text("Got it!")
+          // make the last entry very likely
+          int winStringIndex = rand.nextInt(winStrings.length * 2).clamp(
+              0, winStrings.length - 1);
+          String winString = winStrings[winStringIndex];
+
+          List<String> adjectives = [
+            " charming",
+            " determined",
+            " fabulous",
+            " dynamic",
+            "n imaginative",
+            " breathtaking",
+            " brilliant",
+            "n elegant",
+            " lovely",
+            " spectacular",
+            "n internet-worthy",
+            " screenshot-worthy",
+            " duck-like",
+            "n explosive",
+            " devious",
+            " excellent",
+            " concise"
+          ];
+
+          winString = winString.replaceAll(
+              " ADJECTIVE", adjectives[rand.nextInt(adjectives.length)]);
+
+          bool alreadyHighlighted = false;
+
+          fadePopup(context, AlertDialog(
+            title: Center(child: Text(winString)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Difficulty: ${difficulties[widget.difficulty]}"),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children:
+                  [
+                    Text("Validations used: $_validations"),
+                  ],
+                ),
+                Text("Time: $timeString"),
+                const SizedBox(height: 10),
+                scores.isEmpty
+                    ? const SizedBox.shrink() : SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: Column(
+                    children: scores.map((score) {
+                      bool highlight = false;
+
+                      if(!alreadyHighlighted && timeString == timeToString(score.time)) {
+                        alreadyHighlighted = true;
+                        highlight = true;
+                      }
+
+                      return Container(
+                        padding: const EdgeInsets.all(5),
+                        color: highlight ? DynamicColorTheme.of(context).color : Colors.transparent,
+                        child: DefaultTextStyle(
+                          style: TextStyle(
+                            color: highlight
+                            ? Theme.of(context).canvasColor
+                                  : Theme.of(context).textTheme.bodyMedium!.color!,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children:
+                            [
+                              Text("${scores.indexOf(score) + 1}. ${score.date}"),
+
+                              Text(timeToString(score.time)),
+                            ]
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 16.0, 0, 0),
+                  child: OutlinedButton(
+                    onPressed: () {
+                      // clear save again for good measure
+                      SaveManager().clear(widget.difficulty);
+
+                      // TODO is this a good idea/allowed? How else do I pop twice?
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all(
+                          RoundedRectangleBorder(borderRadius: BorderRadius
+                              .circular(30.0))),
+                    ),
+                    child: const Text("Got it!")
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    ));
+          )
+          );
+        }
+      )
+    );
   }
 
   bool cellInvalid(int x, int y) {
