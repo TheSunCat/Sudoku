@@ -8,9 +8,10 @@ import 'package:flutter/services.dart';
 import 'package:sudoku/painters.dart';
 import 'package:sudoku/save_manager.dart';
 import 'package:sudoku/stack.dart';
+import 'package:sudoku/sudoku.dart';
 import 'package:sudoku/util.dart';
 
-import 'package:sudoku_api/sudoku_api.dart';
+import 'package:sudoku_solver_generator/sudoku_solver_generator.dart';
 
 import 'color_settings.dart';
 import 'custom_app_bar.dart';
@@ -27,7 +28,7 @@ final List<String> difficulties = [
 
 class SudokuGame extends StatefulWidget {
   final int difficulty;
-  final Future<Puzzle>? savedGame;
+  final Future<List<List<Cell>>>? savedGame;
 
   const SudokuGame({Key? key, required this.difficulty, this.savedGame}) : super(key: key);
 
@@ -36,8 +37,7 @@ class SudokuGame extends StatefulWidget {
 }
 
 class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
-  Puzzle? _puzzle;
-  Grid? _board;
+  List<List<Cell>>? _puzzle;
 
   final LIFO<Move> _undoStack = LIFO();
 
@@ -79,23 +79,20 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
     super.dispose();
 
     refreshTimer.cancel();
-    _puzzle?.dispose();
 
     for(int i = 0; i < _scaleAnimationControllers.length; i++) {
       _scaleAnimationControllers[i].dispose();
     }
   }
 
-  void onReady() {
-    _puzzle!.onBoardChange((cell) => {
-      SaveManager().save(widget.difficulty, _puzzle!)
-    });
+  void onBoardChange() {
+    SaveManager().save(widget.difficulty, _puzzle!);
+  }
 
-    _puzzle!.startStopwatch();
+  void onReady() {
+    // TODO _puzzle!.startStopwatch();
 
     setState(() {
-      _board = _puzzle!.board()!;
-
       Random rand = Random();
 
       for(int i = 0; i < _scaleAnimationControllers.length; i++) {
@@ -111,13 +108,22 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     if (_puzzle == null) {
       if(widget.savedGame == null) {
+        // TODO async?
+
+        _puzzle = List.empty(growable: true);
+
         int clues = (difficulties.length - widget.difficulty) * 10;
 
-        _puzzle = Puzzle(PuzzleOptions(patternName: "random", clues: clues));
+        List<List<int>> board = SudokuGenerator(emptySquares: 50 - clues).newSudoku;
 
-        _puzzle!.generate().then((_) {
-          onReady();
-        });
+        for(int row = 0; row < board.length; row++) {
+          _puzzle!.add(List.generate(9, (column) {
+            int val = board[row][column];
+            return Cell(Position(column, row), val, val != 0);
+          }));
+        }
+
+        onReady();
       } else {
         widget.savedGame!.then((value) {
           _puzzle = value;
@@ -130,7 +136,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
     const int boardLength = 9;
 
-    String timeString = timeToString(_puzzle!.getTimeElapsed());
+    String timeString = "TODO";//timeToString(_puzzle!.getTimeElapsed());
 
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -148,12 +154,12 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                   color: Theme.of(context).textTheme.bodyMedium!.color!,
                   onPressed: () {
                     // stop the timer while color settings are changed
-                    _puzzle?.stopStopwatch();
+                    // TODO _puzzle?.stopStopwatch();
 
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const ColorSettings()),
-                    ).then((value) => setState(() => _puzzle?.startStopwatch()));
+                    );// TODO .then((value) => setState(() => _puzzle?.startStopwatch()));
                   },
                   icon: const Icon(Icons.color_lens),
                 )
@@ -242,15 +248,15 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                                   setState(() {
                                     for (int x = 0; x < 9; x++) {
                                       for (int y = 0; y < 9; y++) {
-                                        Position pos = Position(row: y, column: x);
-                                        Cell cell = _board!.cellAt(pos);
-                                        if (cell.getValue() != 0 &&
-                                            !cell.prefill()!) {
+                                        Position pos = Position(x, y);
+                                        Cell cell = _puzzle![x][y];
+                                        if (cell.value != 0 &&
+                                            !cell.prefill) {
 
                                           if(cellInvalid(x, y)) {
                                             _validationWrongCells
                                                 .add(
-                                                Position(row: x, column: y));
+                                                Position(x, y));
                                           }
                                         }
                                       }
@@ -307,15 +313,14 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                                 // undo the move
                                 setState(() {
                                   Move move = _undoStack.pop();
-                                  Cell cell = _board!
-                                      .cellAt(Position(row: move.y, column: move.x));
+                                  Cell cell = _puzzle![move.y][move.x];
 
-                                  cell.setValue(move.value);
+                                  cell.value = move.value;
 
-                                  cell.clearMarkup();
+                                  cell.markup.clear();
                                   // ignore: avoid_function_literals_in_foreach_calls
                                   move.markup.forEach(
-                                      (element) => {cell.addMarkup(element)});
+                                      (element) => cell.markup.add(element) );
                                 });
                               },
                               style: ButtonStyle(
@@ -365,44 +370,46 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
     return GestureDetector(
       onTap: () {
-        if (_puzzle!.board() == null) {
+        if (_puzzle == null) {
           return;
         }
 
-        Position pos = Position(row: y, column: x);
-        Cell cell = _board!.cellAt(pos);
+        Cell cell = _puzzle![y][x];
 
-        if(_selectedNumber == -1 || cell.prefill()!) {
-          numberButtonPressed(cell.getValue()! - 1);
+        if(_selectedNumber == -1) {
+          numberButtonPressed(cell.value - 1);
           return;
         }
 
         // place cell
         setState(() {
           _undoStack
-              .push(Move(x, y, cell.getValue()!, List.from(cell.getMarkup()!)));
+              .push(Move(x, y, cell.value, List.from(cell.markup)));
 
           AnimationController animation = _scaleAnimationControllers[y * 9 + x];
 
           if (_selectedNumber != 10) {
-            if (!_marking && cell.getValue() == _selectedNumber) {
+            if (!_marking && cell.value == _selectedNumber) {
               // wait for animation
               Future.delayed(const Duration(milliseconds: 190), () {
-                setState(() => _puzzle!.fillCell(pos, 0));
+                setState(() {
+                  _puzzle![y][x].value = 0;
+                  onBoardChange();
+                });
               });
 
               _validationWrongCells.removeWhere(
-                  (element) => (x == element.grid!.x && y == element.grid!.y));
+                  (element) => (x == element.x && y == element.y));
 
               animation.reset();
               animation.reverse(from: 1.0);
 
             } else {
               if (_marking) {
-                if (!cell.markup() ||
-                    (!cell.getMarkup()!.contains(_selectedNumber) &&
-                        cell.getMarkup()!.length <= 8)) {
-                  cell.addMarkup(_selectedNumber);
+                if (cell.markup.isEmpty ||
+                    (!cell.markup.contains(_selectedNumber) &&
+                        cell.markup.length <= 8)) {
+                  cell.markup.add(_selectedNumber);
 
                   animation.reset();
                   animation.forward();
@@ -410,45 +417,56 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                   animation.reset();
                   animation.reverse(from: 1.0);
 
-                  cell.removeMarkup(_selectedNumber);
+                  cell.markup.removeWhere((int val) => val == _selectedNumber);
 
                   Future.delayed(const Duration(milliseconds: 500), () {
-                    if (cell.getMarkup()!.isNotEmpty) {
+                    if (cell.markup.isNotEmpty) {
                       animation.reset();
                       animation.forward();
                     }
                   });
                 }
 
-                _puzzle!.fillCell(pos, 0);
+                _puzzle![y][x].value = 0;
 
               } else {
-                cell.clearMarkup();
-                _puzzle!.fillCell(pos, _selectedNumber);
+                cell.markup.clear();
+                _puzzle![y][x].value = _selectedNumber;
 
                 animation.reset();
                 animation.forward();
               }
 
-              _validationWrongCells.removeWhere(
-                  (element) => (x == element.grid!.x && y == element.grid!.y));
+              onBoardChange();
 
-              Future<bool> solved = isBoardSolved();
-              solved.then((value) {
-                if (value) {
+              _validationWrongCells.removeWhere(
+                  (element) => (x == element.x && y == element.y));
+
+              List<List<int>> sudoku = List.empty(growable: true);
+              for(int row = 0; row < 9; row++) {
+                sudoku.add(List.generate(9, (column) => _puzzle![row][column].value));
+              }
+
+              try {
+                bool solved = SudokuUtilities.isSolved(sudoku);
+                if (solved) {
                   win(context);
                 }
-              });
+              } on InvalidSudokuConfigurationException {
+                // Sudoku not solved, do nothing
+              }
             }
-          } else if (!cell.prefill()!) {
+          } else if (!cell.prefill) {
             // wait for animation
             Future.delayed(const Duration(milliseconds: 500), () {
-              cell.clearMarkup();
-              _puzzle!.fillCell(pos, 0);
+              cell.markup.clear();
+              _puzzle![y][x].value = 0;
+
+              onBoardChange();
             });
 
             _validationWrongCells.removeWhere(
-                (element) => (x == element.grid!.x && y == element.grid!.y));
+                (element) => (x == element.x && y == element.y));
 
             animation.reset();
             animation.reverse(from: 1.0);
@@ -471,44 +489,43 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   }
 
   Widget _buildGridItem(int x, int y) {
-    if (_board == null) {
+    if (_puzzle == null) {
       return const SizedBox.shrink();
     }
 
     Animation<double> animation = _scaleAnimations[y * 9 + x];
     bool animating = !(animation.isDismissed || animation.isCompleted);
 
-    Cell cell = _board!.cellAt(Position(column: x, row: y));
-    int val = cell.getValue()!;
+    Cell cell = _puzzle![y][x];
+    int val = cell.value;
 
-    if ((cell.pristine()! && !cell.prefill()!) || (val == 0 && !cell.markup())) {
+    if (val == 0 && cell.markup.isEmpty) {
       return const SizedBox.shrink();
     } // show nothing for empty cells
 
     Color textColor = Theme.of(context).textTheme.bodyMedium!.color!;
     Color itemColor = Colors.transparent;
 
-    if(cell.prefill()!) {
+    if(cell.prefill) {
       textColor = textColor.withOpacity(0.65);
       itemColor = textColor.withOpacity(0.07);
     }
 
     bool highlighted = false;
 
-    if (val == _selectedNumber ||
-        (cell.markup() && cell.getMarkup()!.contains(_selectedNumber))) {
+    if (val == _selectedNumber || cell.markup.contains(_selectedNumber)) {
       itemColor = Theme.of(context).primaryColor;
       highlighted = true;
     }
 
     if (_validationWrongCells
-        .any((element) => ((element.grid!.x == x) && (element.grid!.y == y)))) {
+        .any((element) => ((element.x == x) && (element.y == y)))) {
       itemColor = Colors.red.shade300;
       highlighted = true;
     }
 
-    List<String> markup = List.generate(cell.getMarkup()!.length,
-        (index) => cell.getMarkup()!.elementAt(index).toString());
+    List<String> markup = List.generate(cell.markup.length,
+        (index) => cell.markup[index].toString());
 
     return Padding(
       padding: const EdgeInsets.all(5.0),
@@ -541,7 +558,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                 child: child!
             ),
             child: Center(
-              child: cell.markup()
+              child: cell.markup.isNotEmpty
                   ? Container(
                       color: Colors.transparent,
                       child: FittedBox(
@@ -594,14 +611,14 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   }
 
   Widget _buildNumberButtons(BuildContext context, int index) {
-    if (_board == null) {
+    if (_puzzle == null) {
       return const SizedBox.shrink();
     }
 
     int count = 0;
     for (int x = 0; x < 9; x++) {
       for (int y = 0; y < 9; y++) {
-        if (_board!.getColumn(x)[y].getValue() == index + 1) {
+        if (_puzzle![y][x].value == index + 1) {
           count++;
         }
       }
@@ -698,8 +715,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
         for (int x = 0; x < 9; x++) {
           for (int y = 0; y < 9; y++) {
-            if (_board!.cellAt(Position(row: y, column: x))
-                .getValue()! == _selectedNumber) {
+            if (_puzzle![y][x].value == _selectedNumber) { // TODO maybe check markup
               AnimationController animation = _scaleAnimationControllers[y * 9 + x];
 
               animation.reset();
@@ -716,29 +732,6 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
     });
   }
 
-  Future<bool> isBoardSolved() async {
-    for (int i = 0; i < 9 * 9; i++) {
-      if (_board!.cellAt(Position(index: i)).getValue() == 0) {
-        return false;
-      }
-    }
-
-    for (int x = 0; x < 9; x++) {
-      if (_board!.isColumnViolated(Position(column: x, row: 0))) {
-        return false;
-      }
-      if (_board!.isRowViolated(Position(row: x, column: 0))) {
-        return false;
-      }
-
-      if (_board!.isSegmentViolated(Position(index: x * 9))) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   void win(BuildContext context) {
     SaveManager().getScores(widget.difficulty).then(
       (List<Score> scores) => setState(
@@ -746,20 +739,20 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
           SaveManager().clear(widget.difficulty);
 
           // record the new score
-          SaveManager().recordScore(
-              _puzzle!.getTimeElapsed(), widget.difficulty);
+          // TODO SaveManager().recordScore(
+          //    _puzzle!.getTimeElapsed(), widget.difficulty);
 
           // also add it to our local list
           DateTime now = DateTime.now();
-          scores.add(Score(_puzzle!.getTimeElapsed(), "${now.day} ${DateFormat.yMMM().format(now)}"));
+          //scores.add(Score(_puzzle!.getTimeElapsed(), "${now.day} ${DateFormat.yMMM().format(now)}"));
           scores.sort((a, b) => a.time.compareTo(b.time));
 
           if (scores.length > 10) {
             scores.removeRange(9, scores.length - 1);
           }
 
-          _puzzle!.stopStopwatch();
-          String timeString = timeToString(_puzzle!.getTimeElapsed());
+          // TODO _puzzle!.stopStopwatch();
+          String timeString = "0";// TODO timeToString(_puzzle!.getTimeElapsed());
 
           print("Saved scores: $scores");
 
@@ -880,24 +873,47 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   }
 
   bool cellInvalid(int x, int y) {
-    Cell cell = _board!.cellAt(Position(row: y, column: x));
+    Cell cell = _puzzle![y][x];
 
-    if(cell.prefill()!) {
+    if(cell.prefill) {
       return false;
     }
 
-    Position pos = cell.getPosition()!;
-    int value = cell.getValue()!;
+    Position pos = cell.pos;
+    int value = cell.value;
 
-    if(valueRepeats(_board!.getSegment(pos), value)) {
+    // check segment
+    List<Cell> segment = List.empty(growable: true);
+    int rowStart = y - (y % 3);
+    int columnStart = x - (x % 3);
+
+    for(int row = 0; row < 3; row++) {
+      for(int column = 0; column < 3; column++) {
+        segment.add(_puzzle![row + rowStart][column + columnStart]);
+      }
+    }
+
+    if(valueRepeats(segment, value)) {
       return true;
     }
 
-    if(valueRepeats(_board!.getRow(y), value)) {
+    // check row
+    List<Cell> row = List.empty(growable: true);
+    for(int column = 0; column < 9; column++) {
+      row.add(_puzzle![y][column]);
+    }
+
+    if(valueRepeats(row, value)) {
       return true;
     }
 
-    if(valueRepeats(_board!.getColumn(x), value)) {
+    // check column
+    List<Cell> column = List.empty(growable: true);
+    for(int row = 0; row < 9; row++) {
+      column.add(_puzzle![row][x]);
+    }
+
+    if(valueRepeats(column, value)) {
       return true;
     }
 
@@ -907,7 +923,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   bool valueRepeats(List<Cell> cells, int value) {
     Set<int> seenValues = {};
     for(int i = 0; i < cells.length; i++) {
-      int curVal = cells[i].getValue()!;
+      int curVal = cells[i].value;
 
       if (seenValues.contains(curVal) && curVal == value) {
         return true;

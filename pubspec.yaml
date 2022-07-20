@@ -12,9 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # using a local copy to fix bugs, until PR gets merged
-  sudoku_api:
-    path: external/sudoku_api
+  sudoku_solver_generator: ^2.1.0+1
 
   flutter_colorpicker: ^1.0.3
 

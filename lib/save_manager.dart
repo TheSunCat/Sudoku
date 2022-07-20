@@ -1,9 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sudoku/util.dart';
-import 'dart:convert';
-
-import 'package:sudoku_api/sudoku_api.dart';
+import 'package:sudoku/sudoku.dart';
 
 class SaveManager {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -22,18 +19,18 @@ class SaveManager {
     return prefs.containsKey("board$difficulty");
   }
 
-  void save(int difficulty, Puzzle data) async {
+  void save(int difficulty, List<List<Cell>> data) async {
     final SharedPreferences prefs = await _prefs;
 
-    await prefs.setString("board$difficulty", json.encode(data.toMap()));
+    // TODO await prefs.setString("board$difficulty", json.encode(data.toMap()));
   }
 
-  Future<Puzzle> load(int difficulty) async {
+  Future<List<List<Cell>>> load(int difficulty) async {
     final SharedPreferences prefs = await _prefs;
 
     String jsonData = prefs.getString("board$difficulty")!;
 
-    return Puzzle.fromMap(json.decode(jsonData));
+    return List.empty();// TODO Puzzle.fromMap(json.decode(jsonData));
   }
 
   void clear(int difficulty) async {
