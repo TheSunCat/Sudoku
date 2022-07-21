@@ -21,23 +21,20 @@ class SaveManager {
     return prefs.containsKey("board$difficulty");
   }
 
-  void save(int difficulty, List<List<Cell>> data) async {
+  void save(int difficulty, Sudoku data) async {
     final SharedPreferences prefs = await _prefs;
 
     await prefs.setString("board$difficulty", json.encode(data));
   }
 
-  Future<List<List<Cell>>> load(int difficulty) async {
+  Future<Sudoku> load(int difficulty) async {
     final SharedPreferences prefs = await _prefs;
 
     String jsonData = prefs.getString("board$difficulty")!;
 
-    List<dynamic> jason = json.decode(jsonData);
+    final jason = json.decode(jsonData);
 
-    return List<List<Cell>>.from(jason.map((e) {
-      List<dynamic> list = e;
-      return List<Cell>.from(list.map((f) => Cell.fromJson(f)));
-    }));
+    return Sudoku.fromJson(jason);
   }
 
   void clear(int difficulty) async {

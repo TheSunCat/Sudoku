@@ -28,7 +28,7 @@ final List<String> difficulties = [
 
 class SudokuGame extends StatefulWidget {
   final int difficulty;
-  final Future<List<List<Cell>>>? savedGame;
+  final Future<Sudoku>? savedGame;
 
   const SudokuGame({Key? key, required this.difficulty, this.savedGame}) : super(key: key);
 
@@ -50,6 +50,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   late List<AnimationController> _scaleAnimationControllers;
   late List<Animation<double>> _scaleAnimations;
 
+  Duration _stopwatchOffset = const Duration(); // saved time
   final Stopwatch _stopwatch = Stopwatch();
   late Timer _refreshTimer;
   _SudokuGameState() : super() {
@@ -88,7 +89,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   }
 
   void onBoardChange() {
-    SaveManager().save(widget.difficulty, _puzzle!);
+    SaveManager().save(widget.difficulty, Sudoku(_puzzle!, (_stopwatch.elapsed + _stopwatchOffset).inSeconds));
   }
 
   void onReady() {
@@ -128,7 +129,8 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
         onReady();
       } else {
         widget.savedGame!.then((value) {
-          _puzzle = value;
+          _puzzle = value.game;
+          _stopwatchOffset = Duration(seconds: value.time);
           onReady();
         });
       }
@@ -138,7 +140,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
     const int boardLength = 9;
 
-    String timeString = timeToString(_stopwatch.elapsed);
+    String timeString = timeToString(_stopwatch.elapsed + _stopwatchOffset);
 
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -742,11 +744,11 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
           // record the new score
           SaveManager().recordScore(
-              _stopwatch.elapsed, widget.difficulty);
+              _stopwatch.elapsed + _stopwatchOffset, widget.difficulty);
 
           // also add it to our local list
           DateTime now = DateTime.now();
-          scores.add(Score(_stopwatch.elapsed, "${now.day} ${DateFormat.yMMM().format(now)}"));
+          scores.add(Score(_stopwatch.elapsed + _stopwatchOffset, "${now.day} ${DateFormat.yMMM().format(now)}"));
           scores.sort((a, b) => a.time.compareTo(b.time));
 
           if (scores.length > 10) {
@@ -754,7 +756,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
           }
 
           _stopwatch.stop();
-          String timeString = timeToString(_stopwatch.elapsed);
+          String timeString = timeToString(_stopwatch.elapsed + _stopwatchOffset);
 
           print("Saved scores: $scores");
 

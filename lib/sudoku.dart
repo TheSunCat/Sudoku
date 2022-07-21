@@ -1,3 +1,18 @@
+class Sudoku {
+  List<List<Cell>> game;
+  int time;
+
+  Sudoku(this.game, this.time);
+
+  factory Sudoku.fromJson(Map<String, dynamic> json) =>
+      Sudoku(List<List<Cell>>.from(json['game'].map<List<Cell>>((e) => List<Cell>.from(e.map((f) => Cell.fromJson(f))))), json['time']);
+
+  Map toJson() => {
+    'game': game,
+    'time': time
+  };
+}
+
 class Cell {
   Position pos;
   int value;
