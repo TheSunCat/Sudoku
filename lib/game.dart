@@ -47,8 +47,11 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   int _validations = 0;
   final List<Position> _validationWrongCells = List.empty(growable: true);
 
+  bool _generated = false;
   late List<AnimationController> _scaleAnimationControllers;
   late List<Animation<double>> _scaleAnimations;
+  late AnimationController _noAnimationController;
+  late Animation<double> _noAnimation;
 
   Duration _stopwatchOffset = const Duration(); // saved time
   final Stopwatch _stopwatch = Stopwatch();
@@ -65,14 +68,20 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
     _scaleAnimationControllers = List.generate(9*9, (index) {
       return AnimationController(
-          duration: const Duration(milliseconds: 500),
-          reverseDuration: const Duration(milliseconds: 200),
-          vsync: this, value: 0.1);
+        duration: const Duration(milliseconds: 500),
+        reverseDuration: const Duration(milliseconds: 200),
+        vsync: this,
+      );
     });
+
+    //_scaleAnimationControllers.forEach((element) => element.reset());
 
     _scaleAnimations = List.generate(9*9, (index) {
       return CurvedAnimation(parent: _scaleAnimationControllers[index], curve: Curves.fastLinearToSlowEaseIn);
     });
+
+    _noAnimationController = AnimationController(vsync: this, value: 1);
+    _noAnimation = CurvedAnimation(parent: _noAnimationController, curve: Curves.linear);
   }
 
   @override
@@ -104,6 +113,10 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
           _scaleAnimationControllers[i].forward();
         });
       }
+
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        _generated = true;
+      });
     });
   }
 
@@ -593,63 +606,67 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
               child: null,
             ),
           ),
-          AnimatedBuilder(
-            animation: animation,
-            builder: (context, child) => DefaultTextStyle(
-                style: DefaultTextStyle.of(context).style.apply(
-                    decoration: TextDecoration.none,
-                    color: highlighted
-                        ? ColorTween(begin: textColor, end: Theme.of(context).canvasColor)
-                        .animate(animation).value!
-                        : textColor),
-                child: child!
-            ),
-            child: Center(
-              child: cell.markup.isNotEmpty
-                  ? Container(
-                      color: Colors.transparent,
+          ScaleTransition(
+            scale: _generated ? _noAnimation : animation,
+            alignment: Alignment.center,
+            child: AnimatedBuilder(
+              animation: animation,
+              builder: (context, child) => DefaultTextStyle(
+                  style: DefaultTextStyle.of(context).style.apply(
+                      decoration: TextDecoration.none,
+                      color: highlighted
+                          ? ColorTween(begin: textColor, end: Theme.of(context).canvasColor)
+                          .animate(animation).value!
+                          : textColor),
+                  child: child!
+              ),
+              child: Center(
+                child: cell.markup.isNotEmpty
+                    ? Container(
+                        color: Colors.transparent,
+                        child: FittedBox(
+                          fit: BoxFit.fill,
+                          child: Column(
+                            children: [
+                              // TODO this is ugly. Is there a better way?
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                // NQSP to preserve small text size
+                                children: [
+                                  Text(markup.length >= 8 ? markup[7] : " "),
+                                  Text(markup.length >= 7 ? markup[6] : " "),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(markup.length >= 6 ? markup[5] : " "),
+                                  Text(markup.length >= 5 ? markup[4] : " "),
+                                  Text(markup.length >= 4 ? markup[3] : " "),
+                                  Text(markup.length >= 3 ? markup[2] : " "),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(markup.length >= 2 ? markup[1] : " "),
+                                  Text(markup.length >= 1 ? markup[0] : " "),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      )
+                    : SizedBox(
+                      height: double.infinity,
                       child: FittedBox(
-                        fit: BoxFit.fill,
-                        child: Column(
-                          children: [
-                            // TODO this is ugly. Is there a better way?
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              // NQSP to preserve small text size
-                              children: [
-                                Text(markup.length >= 8 ? markup[7] : " "),
-                                Text(markup.length >= 7 ? markup[6] : " "),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(markup.length >= 6 ? markup[5] : " "),
-                                Text(markup.length >= 5 ? markup[4] : " "),
-                                Text(markup.length >= 4 ? markup[3] : " "),
-                                Text(markup.length >= 3 ? markup[2] : " "),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(markup.length >= 2 ? markup[1] : " "),
-                                Text(markup.length >= 1 ? markup[0] : " "),
-                              ],
-                            )
-                          ],
+                          fit: BoxFit.fill,
+                          child: Text(
+                            val.toString(),
                         ),
                       ),
-                    )
-                  : SizedBox(
-                    height: double.infinity,
-                    child: FittedBox(
-                        fit: BoxFit.fill,
-                        child: Text(
-                          val.toString(),
-                      ),
                     ),
-                  ),
+              ),
             ),
           ),
         ]
