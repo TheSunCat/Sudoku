@@ -849,7 +849,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
             " duck-like",
             "n explosive",
             " devious",
-            " excellent",
+            "n excellent",
             " concise"
           ];
 
