@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sudoku/sudoku.dart';
@@ -22,7 +24,7 @@ class SaveManager {
   void save(int difficulty, List<List<Cell>> data) async {
     final SharedPreferences prefs = await _prefs;
 
-    // TODO await prefs.setString("board$difficulty", json.encode(data.toMap()));
+    await prefs.setString("board$difficulty", json.encode(data));
   }
 
   Future<List<List<Cell>>> load(int difficulty) async {
@@ -30,7 +32,12 @@ class SaveManager {
 
     String jsonData = prefs.getString("board$difficulty")!;
 
-    return List.empty();// TODO Puzzle.fromMap(json.decode(jsonData));
+    List<dynamic> jason = json.decode(jsonData);
+
+    return List<List<Cell>>.from(jason.map((e) {
+      List<dynamic> list = e;
+      return List<Cell>.from(list.map((f) => Cell.fromJson(f)));
+    }));
   }
 
   void clear(int difficulty) async {
@@ -66,7 +73,7 @@ class SaveManager {
   Future<List<Score>> getScores(int difficulty) async {
     final SharedPreferences prefs = await _prefs;
 
-    List<String> scores = prefs.getStringList("scores$difficulty") ?? List<String>.empty();
+    List<String> scores = prefs.getStringList("scores$difficulty") ?? List<String>.empty(growable: true);
 
     // delete invalid entries
     scores.removeWhere((string) => !string.contains('#'));

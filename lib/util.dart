@@ -10,7 +10,7 @@ String timeToString(Duration time) {
   if (time.inMinutes != 0) {
     timeString += "${time.inMinutes % 60}M ";
   }
-  if (time.inSeconds != 0) {
+  if (time.inSeconds >= 0) {
     timeString += "${time.inSeconds % 60}S";
   }
 

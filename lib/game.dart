@@ -41,7 +41,6 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
   final LIFO<Move> _undoStack = LIFO();
 
-
   bool _marking = false;
   int _selectedNumber = -1;
 
@@ -51,11 +50,12 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   late List<AnimationController> _scaleAnimationControllers;
   late List<Animation<double>> _scaleAnimations;
 
-  late Timer refreshTimer;
+  final Stopwatch _stopwatch = Stopwatch();
+  late Timer _refreshTimer;
   _SudokuGameState() : super() {
     // refresh the timer every second
-    refreshTimer = Timer.periodic(
-        const Duration(seconds: 1), (Timer t) => setState(() {}));
+    _refreshTimer = Timer.periodic(
+        const Duration(milliseconds: 500), (Timer t) => setState(() {})); // TODO store time in variable
   }
 
   @override
@@ -76,13 +76,15 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    super.dispose();
 
-    refreshTimer.cancel();
+    _refreshTimer.cancel();
+    _stopwatch.stop();
 
     for(int i = 0; i < _scaleAnimationControllers.length; i++) {
       _scaleAnimationControllers[i].dispose();
     }
+
+    super.dispose();
   }
 
   void onBoardChange() {
@@ -90,13 +92,13 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   }
 
   void onReady() {
-    // TODO _puzzle!.startStopwatch();
+    _stopwatch.start();
 
     setState(() {
       Random rand = Random();
 
       for(int i = 0; i < _scaleAnimationControllers.length; i++) {
-        Future.delayed(Duration(milliseconds: rand.nextInt(500)), () {
+        Future.delayed(Duration(milliseconds: rand.nextInt(1000)), () {
           _scaleAnimationControllers[i].reset();
           _scaleAnimationControllers[i].forward();
         });
@@ -112,9 +114,9 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
         _puzzle = List.empty(growable: true);
 
-        int clues = (difficulties.length - widget.difficulty) * 10;
+        int clues = (difficulties.length - widget.difficulty) * 6;
 
-        List<List<int>> board = SudokuGenerator(emptySquares: 50 - clues).newSudoku;
+        List<List<int>> board = SudokuGenerator(emptySquares: 60 - clues).newSudoku;
 
         for(int row = 0; row < board.length; row++) {
           _puzzle!.add(List.generate(9, (column) {
@@ -136,7 +138,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
     const int boardLength = 9;
 
-    String timeString = "TODO";//timeToString(_puzzle!.getTimeElapsed());
+    String timeString = timeToString(_stopwatch.elapsed);
 
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -154,12 +156,12 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                   color: Theme.of(context).textTheme.bodyMedium!.color!,
                   onPressed: () {
                     // stop the timer while color settings are changed
-                    // TODO _puzzle?.stopStopwatch();
+                    _stopwatch.stop();
 
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const ColorSettings()),
-                    );// TODO .then((value) => setState(() => _puzzle?.startStopwatch()));
+                    ).then((value) => setState(() => _stopwatch.start()));
                   },
                   icon: const Icon(Icons.color_lens),
                 )
@@ -453,7 +455,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                   win(context);
                 }
               } on InvalidSudokuConfigurationException {
-                // Sudoku not solved, do nothing
+                print("Sudoku not solved, do nothing");
               }
             }
           } else if (!cell.prefill) {
@@ -739,20 +741,20 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
           SaveManager().clear(widget.difficulty);
 
           // record the new score
-          // TODO SaveManager().recordScore(
-          //    _puzzle!.getTimeElapsed(), widget.difficulty);
+          SaveManager().recordScore(
+              _stopwatch.elapsed, widget.difficulty);
 
           // also add it to our local list
           DateTime now = DateTime.now();
-          //scores.add(Score(_puzzle!.getTimeElapsed(), "${now.day} ${DateFormat.yMMM().format(now)}"));
+          scores.add(Score(_stopwatch.elapsed, "${now.day} ${DateFormat.yMMM().format(now)}"));
           scores.sort((a, b) => a.time.compareTo(b.time));
 
           if (scores.length > 10) {
             scores.removeRange(9, scores.length - 1);
           }
 
-          // TODO _puzzle!.stopStopwatch();
-          String timeString = "0";// TODO timeToString(_puzzle!.getTimeElapsed());
+          _stopwatch.stop();
+          String timeString = timeToString(_stopwatch.elapsed);
 
           print("Saved scores: $scores");
 
