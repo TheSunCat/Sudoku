@@ -39,7 +39,7 @@ class SudokuGame extends StatefulWidget {
 class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   List<List<Cell>>? _puzzle;
 
-  final LIFO<Move> _undoStack = LIFO();
+  final LIFO<List<Move>> _undoStack = LIFO();
 
   bool _marking = false;
   int _selectedNumber = -1;
@@ -316,15 +316,16 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
                                 // undo the move
                                 setState(() {
-                                  Move move = _undoStack.pop();
-                                  Cell cell = _puzzle![move.y][move.x];
+                                  _undoStack.pop().forEach((move) {
+                                    Cell cell = _puzzle![move.y][move.x];
 
-                                  cell.value = move.value;
+                                    cell.value = move.value;
 
-                                  cell.markup.clear();
-                                  // ignore: avoid_function_literals_in_foreach_calls
-                                  move.markup.forEach(
-                                      (element) => cell.markup.add(element) );
+                                    cell.markup.clear();
+                                    // ignore: avoid_function_literals_in_foreach_calls
+                                    move.markup.forEach(
+                                            (element) => cell.markup.add(element) );
+                                  });
                                 });
                               },
                               style: ButtonStyle(
@@ -385,10 +386,14 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
           return;
         }
 
+        if(cell.prefill) {
+          return;
+        }
+
         // place cell
         setState(() {
           _undoStack
-              .push(Move(x, y, cell.value, List.from(cell.markup)));
+              .push([Move(x, y, cell.value, List.from(cell.markup))]);
 
           AnimationController animation = _scaleAnimationControllers[y * 9 + x];
 
@@ -409,7 +414,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
               animation.reverse(from: 1.0);
 
             } else {
-              if (_marking) {
+              if (_marking && _selectedNumber != 0) {
                 if (cell.markup.isEmpty ||
                     (!cell.markup.contains(_selectedNumber) &&
                         cell.markup.length <= 8)) {
@@ -437,6 +442,47 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                 cell.markup.clear();
                 _puzzle![y][x].value = _selectedNumber;
 
+                // remove markups that are no longer valid
+                for(int row = 0; row < 9; row++) {
+                  _puzzle![row][x].markup.removeWhere((int val) {
+                    bool ret = val == _selectedNumber;
+
+                    if(ret) {
+                      _undoStack.peek.add(Move(x, row, _puzzle![row][x].value, List.from(_puzzle![row][x].markup)));
+                    }
+
+                    return ret;
+                  });
+                }
+
+                for(int column = 0; column < 9; column++) {
+                  _puzzle![y][column].markup.removeWhere((int val) {
+                    bool ret = val == _selectedNumber;
+
+                    if(ret) {
+                      _undoStack.peek.add(Move(column, y, _puzzle![y][column].value, List.from(_puzzle![y][column].markup)));
+                    }
+
+                    return ret;
+                  });
+                }
+
+                int rowStart = y - (y % 3);
+                int columnStart = x - (x % 3);
+                for(int row = rowStart; row < rowStart + 3; row++) {
+                  for(int column = columnStart; column < columnStart + 3; column++) {
+                    _puzzle![row][column].markup.removeWhere((int val) {
+                      bool ret = val == _selectedNumber;
+
+                      if(ret) {
+                        _undoStack.peek.add(Move(column, row, _puzzle![row][column].value, List.from(_puzzle![row][column].markup)));
+                      }
+
+                      return ret;
+                    });
+                  }
+                }
+
                 animation.reset();
                 animation.forward();
               }
@@ -457,17 +503,14 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                   win(context);
                 }
               } on InvalidSudokuConfigurationException {
-                print("Sudoku not solved, do nothing");
+                // Sudoku would not validate here
               }
             }
           } else if (!cell.prefill) {
-            // wait for animation
-            Future.delayed(const Duration(milliseconds: 500), () {
-              cell.markup.clear();
-              _puzzle![y][x].value = 0;
+            cell.markup.clear();
+            _puzzle![y][x].value = 0;
 
-              onBoardChange();
-            });
+            onBoardChange();
 
             _validationWrongCells.removeWhere(
                 (element) => (x == element.x && y == element.y));
