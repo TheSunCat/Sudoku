@@ -11,8 +11,13 @@ import 'package:system_theme/system_theme.dart';
 
 import 'color_settings.dart';
 
-void main() {
-  runApp(const Sudoku());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown
+  ]).then((_) => runApp(const Sudoku()));
 }
 
 class Sudoku extends StatelessWidget {
