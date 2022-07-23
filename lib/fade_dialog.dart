@@ -53,11 +53,14 @@ void fadePopup(BuildContext context, Widget contents, {bool dismissable = false}
 
       final opacity = CurvedAnimation(parent: a1, curve: curve);
 
-      return FadeTransition(
-        opacity: opacity,
-        child: SlideTransition(
-          position: tween.animate(curvedAnimation),
-          child: contents
+      return WillPopScope(
+        onWillPop: () async => false,
+        child: FadeTransition(
+          opacity: opacity,
+          child: SlideTransition(
+            position: tween.animate(curvedAnimation),
+            child: contents
+          ),
         ),
       );
     },
