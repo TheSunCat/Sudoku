@@ -1,0 +1,14 @@
+SUD💜KU es un juego de Sudoku libre y de código abierto para Android sencillo, sin sacrificar sus funciones y estilo visual moderno.
+
+Características
+<ul>
+    <li>¡Jugar al Sudoku!</li>
+    <li>Marcar donde podrían ir los números.</li>
+    <li>Seleccionar números para examinar mejor el tablero de juego.</li>
+    <li>Validar el tablero actual para buscar errores.</li>
+    <li>Animations fluidas y cuidadas.</li>
+    <li>Personalización de los colores.</li>
+    <li>Tabla de clasificación local para seguir tus mejores tiempos, ordenados por dificultad.</li>
+    <li>Guarda automáticamente el juego para poder continuar luego donde fue dejado.</li>
+    <li>¡Código totalmente libre y abierto!</li>
+</ul>

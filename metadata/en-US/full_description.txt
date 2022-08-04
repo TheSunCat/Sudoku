@@ -1,0 +1,14 @@
+SUD💜KU is a free and open source Sudoku game that aims to be simple to play yet featureful and visually polished.
+
+Features
+<ul>
+    <li>Play Sudoku!</li>
+    <li>Markup where numbers could go.</li>
+    <li>Highlight numbers to better examine the board.</li>
+    <li>Validate the current board to find mistakes.</li>
+    <li>Smooth and sleek animations.</li>
+    <li>Full theming support.</li>
+    <li>Local leaderboard to track your best times per difficulty.</li>
+    <li>Auto-save the game so you can pick back up where you left off.</li>
+    <li>Fully Free and Open Source Software!</li>
+</ul>
