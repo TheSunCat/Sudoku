@@ -1,4 +1,4 @@
-# Sudoku
+# SUD💜KU
 
 FOSS Sudoku! What else needs be said?
 
