@@ -2,10 +2,14 @@
 
 FOSS Sudoku! What else needs be said?
 
+
+<a href="https://liberapay.com/TheSunCat/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"> <img src="https://img.shields.io/liberapay/receives/TheSunCat.svg"></a>
+
+
 <p float="left">
-<img src="https://user-images.githubusercontent.com/44881120/180610158-ccfbb1ae-0d23-4e18-a52e-e794e0fdbba6.png" width=30%>
-<img src="https://user-images.githubusercontent.com/44881120/180610238-0c2b0a4d-308d-4f3a-b693-ada348b8ab67.png" width=30%>
-<img src="https://user-images.githubusercontent.com/44881120/180610268-181ce4b1-5e82-4218-a1f0-35e0985b4b10.png" width=30%>
+<img src="https://github.com/TheSunCat/Sudoku/raw/main/metadata/en-US/images/phoneScreenshots/01_home.png" width=30%>
+<img src="https://github.com/TheSunCat/Sudoku/raw/main/metadata/en-US/images/phoneScreenshots/02_ingame.png" width=30%>
+<img src="https://github.com/TheSunCat/Sudoku/raw/main/metadata/en-US/images/phoneScreenshots/03_ingame.png" width=30%>
 </p>
 
 ## Features
