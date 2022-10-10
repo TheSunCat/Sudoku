@@ -23,10 +23,16 @@ FOSS Sudoku! What else needs be said?
 - Auto-save the game so you can pick back up where you left off.
 - Fully Free and Open Source Software!
 
+
 ## How to run
 
 ### Android
-Download and install the APK. It should run with no problems.
+
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/com.thesuncat.sudoku/)
+
+Or [download the APK from the Releases section](https://github.com/TheSunCat/Sudoku/releases/latest) and install it. It should run with no problems.
 
 ### Linux
 Run the `sudoku` binary. You may need to mark it as executable first.
