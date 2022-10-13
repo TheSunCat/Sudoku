@@ -271,7 +271,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                                     for (int x = 0; x < 9; x++) {
                                       for (int y = 0; y < 9; y++) {
                                         Position pos = Position(x, y);
-                                        Cell cell = _puzzle![x][y];
+                                        Cell cell = _puzzle![y][x];
                                         if (cell.value != 0 &&
                                             !cell.prefill) {
 
