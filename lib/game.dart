@@ -16,6 +16,7 @@ import 'package:sudoku_solver_generator/sudoku_solver_generator.dart';
 import 'color_settings.dart';
 import 'custom_app_bar.dart';
 import 'fade_dialog.dart';
+import 'leaderboard.dart';
 import 'move.dart';
 
 final List<String> difficulties = [
@@ -860,8 +861,6 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
           winString = winString.replaceAll(
               " ADJECTIVE", adjectives[rand.nextInt(adjectives.length)]);
 
-          bool alreadyHighlighted = false;
-
           fadePopup(context, AlertDialog(
             title: Center(child: Text(winString)),
             content: Column(
@@ -877,41 +876,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                 ),
                 Text("Time: $timeString"),
                 const SizedBox(height: 10),
-                scores.isEmpty
-                    ? const SizedBox.shrink() : SingleChildScrollView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  child: Column(
-                    children: scores.map((score) {
-                      bool highlight = false;
-
-                      if(!alreadyHighlighted && timeString == timeToString(score.time)) {
-                        alreadyHighlighted = true;
-                        highlight = true;
-                      }
-
-                      return Container(
-                        padding: const EdgeInsets.all(5),
-                        color: highlight ? DynamicColorTheme.of(context).color : Colors.transparent,
-                        child: DefaultTextStyle(
-                          style: TextStyle(
-                            color: highlight
-                            ? Theme.of(context).canvasColor
-                                  : Theme.of(context).textTheme.bodyMedium!.color!,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children:
-                            [
-                              Text("${scores.indexOf(score) + 1}. ${score.date}"),
-
-                              Text(timeToString(score.time)),
-                            ]
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
+                makeLeaderboard(context, scores, highlightTime: timeString),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 16.0, 0, 0),
                   child: OutlinedButton(
