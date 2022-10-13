@@ -176,7 +176,11 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const ColorSettings()),
-                    ).then((value) => setState(() => _stopwatch.start()));
+                    ).then((value) => setState(()
+                        {
+                          _stopwatch.start();
+
+                        }));
                   },
                   icon: const Icon(Icons.color_lens),
                 )

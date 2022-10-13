@@ -100,7 +100,7 @@ class EdgePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(EdgePainter oldDelegate) => false;
+  bool shouldRepaint(EdgePainter oldDelegate) => true;
 
   @override
   bool shouldRebuildSemantics(EdgePainter oldDelegate) => false;

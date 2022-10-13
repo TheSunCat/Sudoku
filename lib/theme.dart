@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Example buildTheme method
 ThemeData buildTheme(Color accentColor, bool isDark) {
 
   final ThemeData base = isDark ? ThemeData.dark() : ThemeData.light();
@@ -22,7 +21,8 @@ ThemeData buildTheme(Color accentColor, bool isDark) {
     ),
     primaryColor: accentColor,
     scaffoldBackgroundColor: canvasColor,
-    textTheme: _buildTextTheme(base.textTheme, isDark),
+    dividerColor: Color.lerp(accentColor, canvasColor, 0.5),
+    textTheme: _buildTextTheme(base.textTheme, isDark)
   );
 }
 
