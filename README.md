@@ -4,6 +4,9 @@ FOSS Sudoku! What else needs be said?
 
 
 <a href="https://liberapay.com/TheSunCat/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"> <img src="https://img.shields.io/liberapay/receives/TheSunCat.svg"></a>
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/com.thesuncat.sudoku/)
 
 
 <p float="left">
@@ -54,6 +57,9 @@ Clone the repository, run `flutter pub get`, and run one of the following:
 - Microsoft Windows (untested, unsupported): `flutter build windows`
 
 You will find the build output inside your platform's folder within `./build/`. All contributions are welcome!
+
+## Credits
+The design of this app takes inspiration from the excellent [Sudoku - The Clean One](https://play.google.com/store/apps/details?id=ee.dustland.android.dustlandsudoku) app available on the Google Play Store. Thanks!
 
 <br><br>
 ---
