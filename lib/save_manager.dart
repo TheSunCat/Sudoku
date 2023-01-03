@@ -61,7 +61,7 @@ class SaveManager {
     );
 
     if(scores.length > 10) {
-      scores.removeRange(9, scores.length - 1);
+      scores.removeRange(10, scores.length);
     }
 
     prefs.setStringList("scores$difficulty", scores);
