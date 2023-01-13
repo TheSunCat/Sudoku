@@ -813,8 +813,16 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
 
           // also add it to our local list
           DateTime now = DateTime.now();
-          scores.add(Score(_stopwatch.elapsed + _stopwatchOffset, "${now.day} ${DateFormat.yMMM().format(now)}"));
-          scores.sort((a, b) => a.time.compareTo(b.time));
+          Score currentScore = Score(_stopwatch.elapsed + _stopwatchOffset, "${now.day} ${DateFormat.yMMM().format(now)}");
+
+          int index = 0;
+          while (index < scores.length) {
+            if (scores[index].time >= currentScore.time) {
+              break;
+            }
+            index++;
+          }
+          scores.insert(index, currentScore);
 
           if (scores.length > 10) {
             scores.removeRange(10, scores.length);
