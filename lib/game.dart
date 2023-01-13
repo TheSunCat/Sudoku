@@ -817,7 +817,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
           scores.sort((a, b) => a.time.compareTo(b.time));
 
           if (scores.length > 10) {
-            scores.removeRange(9, scores.length - 1);
+            scores.removeRange(10, scores.length);
           }
 
           _stopwatch.stop();
