@@ -340,9 +340,17 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                                     cell.value = move.value;
 
                                     cell.markup.clear();
-                                    // ignore: avoid_function_literals_in_foreach_calls
-                                    move.markup.forEach(
-                                            (element) => cell.markup.add(element) );
+                                    for (var element in move.markup) {
+                                      cell.markup.add(element);
+                                    }
+
+                                    // reset animation
+                                    AnimationController animation = _scaleAnimationControllers[move.y * 9 + move.x];
+                                    animation.reset();
+                                    animation.forward();
+
+                                    // save the board
+                                    onBoardChange();
                                   });
                                 });
                               },
