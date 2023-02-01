@@ -56,9 +56,13 @@ class SaveManager {
     DateTime now = DateTime.now();
     scores.add("${now.day} ${DateFormat.yMMM().format(now)}#${time.inSeconds}");
 
-    scores.sort((String a, String b) =>
-        int.parse(a.substring(a.indexOf('#') + 1, a.length)).compareTo(int.parse(b.substring(b.indexOf('#') + 1, b.length)))
-    );
+    scores.sort((String a, String b) {
+      int ret = int.parse(a.substring(a.indexOf('#') + 1, a.length)).compareTo(
+          int.parse(b.substring(b.indexOf('#') + 1, b.length)));
+
+      // if times are equal, place our new time above
+      return ret == 0 ? -1 : ret;
+    });
 
     if(scores.length > 10) {
       scores.removeRange(10, scores.length);
