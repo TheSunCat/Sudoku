@@ -40,6 +40,8 @@ class SudokuGame extends StatefulWidget {
 class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   List<List<Cell>>? _puzzle;
 
+  bool _hasReset = false;
+
   final LIFO<List<Move>> _undoStack = LIFO();
 
   bool _marking = false;
@@ -60,7 +62,7 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
   _SudokuGameState() : super() {
     // refresh the timer every second
     _refreshTimer = Timer.periodic(
-        const Duration(milliseconds: 500), (Timer t) => setState(() {})); // TODO store time in variable
+        const Duration(milliseconds: 900), (Timer t) => setState(() {})); // TODO store time in variable
   }
 
   @override
@@ -119,12 +121,15 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
         _generated = true;
       });
     });
+
+    // save the new game
+    onBoardChange();
   }
 
   @override
   Widget build(BuildContext context) {
     if (_puzzle == null) {
-      if(widget.savedGame == null) {
+      if(widget.savedGame == null || _hasReset) {
         // TODO async?
 
         _puzzle = List.empty(growable: true);
@@ -246,6 +251,13 @@ class _SudokuGameState extends State<SudokuGame> with TickerProviderStateMixin {
                                     _selectedNumber = -1;
                                     _validationWrongCells.clear();
                                     _undoStack.clear();
+
+                                    // reset time
+                                    _stopwatch.reset();
+                                    _stopwatchOffset = const Duration();
+
+                                    // set flag to ignore saved game
+                                    _hasReset = true;
                                   });
                                 });
                               },
