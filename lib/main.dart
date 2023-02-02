@@ -17,6 +17,9 @@ import 'color_settings.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // set my favorite color as a fallback
+  SystemTheme.fallbackColor = const Color.fromARGB(0xFF, 0xAA, 0x8E, 0xD6);
+
   await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown
@@ -33,8 +36,7 @@ class Root extends StatelessWidget {
         data: (Color color, bool isDark) {
           return buildTheme(color, isDark);
         },
-        defaultColor: const Color.fromARGB(0xFF, 0xAA, 0x8E,
-            0xD6), // TODO maybe SystemTheme.accentColor.accent
+        defaultColor: SystemTheme.accentColor.accent,
         defaultIsDark: SystemTheme.isDarkMode,
         themedWidgetBuilder: (BuildContext context, ThemeData theme) {
           return MaterialApp(

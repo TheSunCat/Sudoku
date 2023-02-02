@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:sudoku/custom_app_bar.dart';
+import 'package:system_theme/system_theme.dart';
 
 class ColorSettings extends StatefulWidget {
   const ColorSettings({Key? key}) : super(key: key);
@@ -129,8 +130,8 @@ class _ColorSettingsState extends State<ColorSettings> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      DynamicColorTheme.of(context).setColor(color: const Color.fromARGB(0xFF, 0xAA, 0x8E, 0xD6), shouldSave: true);
-                      DynamicColorTheme.of(context).setIsDark(isDark: false, shouldSave: true);
+                      DynamicColorTheme.of(context).setColor(color: SystemTheme.accentColor.accent, shouldSave: true);
+                      DynamicColorTheme.of(context).setIsDark(isDark: SystemTheme.isDarkMode, shouldSave: true);
                     },
                     style: ButtonStyle(
                       shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
