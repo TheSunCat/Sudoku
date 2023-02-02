@@ -44,7 +44,6 @@ class SaveManager {
   }
 
   // scores are stringified as yMd#time
-
   void recordScore(Duration time, int difficulty) async {
     final SharedPreferences prefs = await _prefs;
 
@@ -54,15 +53,21 @@ class SaveManager {
     scores.removeWhere((string) => !string.contains('#'));
 
     DateTime now = DateTime.now();
-    scores.add("${now.day} ${DateFormat.yMMM().format(now)}#${time.inSeconds}");
+    String currentScore = "${now.day} ${DateFormat.yMMM().format(now)}#${time.inSeconds}";
 
-    scores.sort((String a, String b) {
-      int ret = int.parse(a.substring(a.indexOf('#') + 1, a.length)).compareTo(
-          int.parse(b.substring(b.indexOf('#') + 1, b.length)));
+    // place new score at correct position
+    int index = 0;
+    int currentScoreTime = int.parse(currentScore.substring(currentScore.indexOf('#') + 1));
 
-      // if times are equal, place our new time above
-      return ret == 0 ? -1 : ret;
-    });
+    while (index < scores.length) {
+      String otherScore = scores[index];
+      int otherScoreTime = int.parse(otherScore.substring(otherScore.indexOf('#') + 1));
+      if (otherScoreTime >= currentScoreTime) {
+        break;
+      }
+      index++;
+    }
+    scores.insert(index, currentScore);
 
     if(scores.length > 10) {
       scores.removeRange(10, scores.length);
