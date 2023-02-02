@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:confetti/confetti.dart';
 import 'package:intl/intl.dart';
 import 'package:dynamic_color_theme/dynamic_color_theme.dart';
 import 'package:flutter/material.dart';
@@ -35,16 +36,22 @@ class _SudokuGameState extends State<SudokuGame> {
   Duration _stopwatchOffset = const Duration(); // saved time
   final Stopwatch _stopwatch = Stopwatch();
   late Timer _refreshTimer;
+  late ConfettiController _confetti;
+
   _SudokuGameState() : super() {
     // refresh the timer every second
     _refreshTimer = Timer.periodic(
         const Duration(milliseconds: 900), (Timer t) => setState(() {})); // TODO store time in variable
+
+    _confetti = ConfettiController(duration: const Duration(seconds: 10));
   }
 
   @override
   void dispose() {
     _refreshTimer.cancel();
     _stopwatch.stop();
+
+    _confetti.dispose();
 
     super.dispose();
   }
@@ -403,43 +410,53 @@ class _SudokuGameState extends State<SudokuGame> {
           winString = winString.replaceAll(
               " ADJECTIVE", adjectives[rand.nextInt(adjectives.length)]);
 
+          _confetti.play();
+
           fadePopup(context, AlertDialog(
             title: Center(child: Text(winString)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text("Difficulty: ${difficulties[widget.difficulty]}"),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children:
-                  [
-                    Text("Validations used: ${_gameBoard.currentState!.getValidations()}"),
-                  ],
+            content: Stack(
+              children: <Widget>[
+                ConfettiWidget(
+                  confettiController: _confetti,
+                  blastDirectionality: BlastDirectionality.explosive, // don't specify a direction, blast randomly
+                  shouldLoop: true, // start again as soon as the animation is finished
                 ),
-                Text("Time: $timeString"),
-                const SizedBox(height: 10),
-                makeLeaderboard(context, scores, highlightTime: timeString),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 16.0, 0, 0),
-                  child: OutlinedButton(
-                    onPressed: () {
-                      // clear save again for good measure
-                      SaveManager().clear(widget.difficulty);
-
-                      // TODO is this a good idea/allowed? How else do I pop twice?
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pop();
-                    },
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all(
-                          RoundedRectangleBorder(borderRadius: BorderRadius
-                              .circular(30.0))),
-                    ),
-                    child: const Text("Got it!")
+                Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Difficulty: ${difficulties[widget.difficulty]}"),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children:
+                    [
+                      Text("Validations used: ${_gameBoard.currentState!.getValidations()}"),
+                    ],
                   ),
-                ),
-              ],
-            ),
+                  Text("Time: $timeString"),
+                  const SizedBox(height: 10),
+                  makeLeaderboard(context, scores, highlightTime: timeString),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 16.0, 0, 0),
+                    child: OutlinedButton(
+                      onPressed: () {
+                        // clear save again for good measure
+                        SaveManager().clear(widget.difficulty);
+
+                        // TODO is this a good idea/allowed? How else do I pop twice?
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pop();
+                      },
+                      style: ButtonStyle(
+                        shape: MaterialStateProperty.all(
+                            RoundedRectangleBorder(borderRadius: BorderRadius
+                                .circular(30.0))),
+                      ),
+                      child: const Text("Got it!")
+                    ),
+                  ),
+                ],
+              ),
+            ]),
           )
           );
         }

@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
 
   sudoku_solver_generator: ^2.1.0+1
+  confetti: ^0.7.0
 
     #flutter_colorpicker: ^1.0.3
 
