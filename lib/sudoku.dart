@@ -48,3 +48,11 @@ class Position {
     'y': y
   };
 }
+
+final List<String> difficulties = [
+  "Beginner",
+  "Easy",
+  "Medium",
+  "Hard",
+  "Extreme"
+];

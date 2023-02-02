@@ -8,6 +8,7 @@ import 'package:sudoku/game.dart';
 import 'package:sudoku/leaderboard.dart';
 import 'package:sudoku/painters.dart';
 import 'package:sudoku/save_manager.dart';
+import 'package:sudoku/sudoku.dart';
 import 'package:sudoku/theme.dart';
 import 'package:system_theme/system_theme.dart';
 
@@ -19,11 +20,11 @@ void main() async {
   await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown
-  ]).then((_) => runApp(const Sudoku()));
+  ]).then((_) => runApp(const Root()));
 }
 
-class Sudoku extends StatelessWidget {
-  const Sudoku({Key? key}) : super(key: key);
+class Root extends StatelessWidget {
+  const Root({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
@@ -71,7 +72,6 @@ class _HomePageState extends State<HomePage> {
     saveFuture.then((value) => setState(() {
       _difficultyStr = difficulties[_difficulty];
       _hasSave = value;
-      print("hasSave: $_hasSave");
     }));
   }
 
@@ -181,35 +181,43 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                  OutlinedButton(
-                    onPressed: _hasSave
-                        ? () async {
-                            final temp = await Navigator.push(
-                              context,
+                  FutureBuilder<Sudoku>(
+                    future: SaveManager().load(_difficulty),
+                    builder: (BuildContext context, AsyncSnapshot<Sudoku> sudoku) {
+                      // TODO how can I check whether the AsyncSnapshot has completed yet?
+
+                      return OutlinedButton(
+                        onPressed: _hasSave
+                          ? () async {
+                            final temp = await Navigator.push(context,
                               MaterialPageRoute(
                                 builder: (context) => SudokuGame(
                                   difficulty: _difficulty,
-                                  savedGame: SaveManager().load(_difficulty),
+                                  savedGame: sudoku.data!,
                                 ),
                               ),
                             );
                             setState(() => _updateDifficulty(0));
-                          }
-                        : null,
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0))),
-                      foregroundColor: MaterialStateProperty.all(
-                          Theme.of(context)
+                        } : null,
+                        style: ButtonStyle(
+                          shape: MaterialStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0)
+                            )
+                          ),
+                          foregroundColor: MaterialStateProperty.all(
+                            Theme.of(context)
                               .textTheme
                               .bodyMedium!
                               .color!
-                              .withOpacity(_hasSave ? 1 : 0.5)),
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text("Continue", style: TextStyle(fontSize: 20)),
-                    ),
+                              .withOpacity(_hasSave ? 1 : 0.5)
+                          ),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text("Continue", style: TextStyle(fontSize: 20)),
+                       ));
+                    }
                   ),
                 ],
               ),
