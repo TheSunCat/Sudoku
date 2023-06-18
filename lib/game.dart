@@ -51,6 +51,10 @@ class _SudokuGameState extends State<SudokuGame> {
 
   void onBoardChanged(List<List<Cell>> puzzle) {
     SaveManager().save(widget.difficulty, Sudoku(puzzle, (_stopwatch.elapsed + _stopwatchOffset).inSeconds));
+
+    // update number buttons
+    // the true means nothing, but is required to call setState
+    setState(() => true);
   }
 
   void onReady() {
