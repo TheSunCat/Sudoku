@@ -14,16 +14,18 @@ dependencies:
 
   sudoku_solver_generator: ^2.1.0+1
 
-    #flutter_colorpicker: ^1.0.3
-
   # using a local copy to fix old dependency, until PR gets merged
   dynamic_color_theme:
     path: external/dynamic_color_theme
 
-  system_theme: ^2.0.0
+  # version 2.3.0 removes dark theme support, which we need
+  system_theme: 2.2.0
 
   shared_preferences: ^2.0.15
   intl: ^0.18.0
+  smooth_page_indicator: ^1.1.0
+  url_launcher: ^6.1.14
+  package_info_plus: ^5.0.0
 
 dev_dependencies:
   #flutter_test:

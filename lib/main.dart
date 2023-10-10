@@ -10,8 +10,10 @@ import 'package:sudoku/painters.dart';
 import 'package:sudoku/save_manager.dart';
 import 'package:sudoku/sudoku.dart';
 import 'package:sudoku/theme.dart';
+import 'package:sudoku/tutorial.dart';
 import 'package:system_theme/system_theme.dart';
 
+import 'about.dart';
 import 'color_settings.dart';
 
 void main() async {
@@ -23,32 +25,67 @@ void main() async {
   await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown
-  ]).then((_) => runApp(const Root()));
+  ]).then((_) => runApp(const Splash()));
 }
 
-class Root extends StatelessWidget {
-  const Root({Key? key}) : super(key: key);
+class Splash extends StatefulWidget {
+  const Splash({super.key});
 
-  // This widget is the root of your application.
+  @override
+  SplashState createState() => SplashState();
+}
+
+class SplashState extends State<Splash> {
+  Future<String> checkFirstSeen() async {
+    bool seen = await SaveManager().hasSeenTutorial();
+
+    if (seen) {
+      return HomePage.id;
+    } else {
+      return Tutorial.id;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkFirstSeen();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DynamicColorTheme(
-        data: (Color color, bool isDark) {
-          return buildTheme(color, isDark);
-        },
-        defaultColor: SystemTheme.accentColor.accent,
-        defaultIsDark: SystemTheme.isDarkMode,
-        themedWidgetBuilder: (BuildContext context, ThemeData theme) {
-          return MaterialApp(
-            title: 'Sudoku',
-            theme: theme,
-            home: const HomePage(),
-          );
-        });
+    return FutureBuilder(
+      future: checkFirstSeen(),
+      builder: (context, AsyncSnapshot<String> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
+
+        return DynamicColorTheme(
+            data: (Color color, bool isDark) {
+              return buildTheme(color, isDark);
+            },
+            defaultColor: SystemTheme.accentColor.accent,
+            defaultIsDark: SystemTheme.isDarkMode,
+            themedWidgetBuilder: (BuildContext context, ThemeData theme) {
+              return MaterialApp(
+                title: 'Sudoku',
+                theme: theme,
+                initialRoute: snapshot.data,
+                routes: {
+                  HomePage.id: (context) => const HomePage(),
+                  Tutorial.id: (context) => const Tutorial(),
+                },
+              );
+            });
+      },
+    );
   }
 }
 
 class HomePage extends StatefulWidget {
+  static String id = 'HomePage';
+
   const HomePage({Key? key}) : super(key: key);
 
   @override
@@ -72,9 +109,9 @@ class _HomePageState extends State<HomePage> {
     Future<bool> saveFuture = SaveManager().saveExists(_difficulty);
 
     saveFuture.then((value) => setState(() {
-      _difficultyStr = difficulties[_difficulty];
-      _hasSave = value;
-    }));
+          _difficultyStr = difficulties[_difficulty];
+          _hasSave = value;
+        }));
   }
 
   @override
@@ -184,43 +221,44 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   FutureBuilder<Sudoku>(
-                    future: SaveManager().load(_difficulty),
-                    builder: (BuildContext context, AsyncSnapshot<Sudoku> sudoku) {
-                      // TODO how can I check whether the AsyncSnapshot has completed yet?
+                      future: SaveManager().load(_difficulty),
+                      builder:
+                          (BuildContext context, AsyncSnapshot<Sudoku> sudoku) {
+                        // TODO how can I check whether the AsyncSnapshot has completed yet?
 
-                      return OutlinedButton(
-                        onPressed: _hasSave
-                          ? () async {
-                            final temp = await Navigator.push(context,
-                              MaterialPageRoute(
-                                builder: (context) => SudokuGame(
-                                  difficulty: _difficulty,
-                                  savedGame: sudoku.data!,
-                                ),
-                              ),
-                            );
-                            setState(() => _updateDifficulty(0));
-                        } : null,
-                        style: ButtonStyle(
-                          shape: MaterialStateProperty.all(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30.0)
-                            )
-                          ),
-                          foregroundColor: MaterialStateProperty.all(
-                            Theme.of(context)
-                              .textTheme
-                              .bodyMedium!
-                              .color!
-                              .withOpacity(_hasSave ? 1 : 0.5)
-                          ),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text("Continue", style: TextStyle(fontSize: 20)),
-                       ));
-                    }
-                  ),
+                        return OutlinedButton(
+                            onPressed: _hasSave
+                                ? () async {
+                                    final temp = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => SudokuGame(
+                                          difficulty: _difficulty,
+                                          savedGame: sudoku.data!,
+                                        ),
+                                      ),
+                                    );
+                                    setState(() => _updateDifficulty(0));
+                                  }
+                                : null,
+                            style: ButtonStyle(
+                              shape: MaterialStateProperty.all(
+                                  RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(30.0))),
+                              foregroundColor: MaterialStateProperty.all(
+                                  Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium!
+                                      .color!
+                                      .withOpacity(_hasSave ? 1 : 0.5)),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text("Continue",
+                                  style: TextStyle(fontSize: 20)),
+                            ));
+                      }),
                 ],
               ),
               Row(
@@ -238,31 +276,42 @@ class _HomePageState extends State<HomePage> {
                   IconButton(
                       color: Theme.of(context).textTheme.bodyMedium!.color!,
                       onPressed: () => SaveManager()
-                        .getScores(_difficulty)
-                        .then((List<Score> scores) => fadePopup(
-                            context, AlertDialog(
-                              title: const Center(child: Text("Scores")),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  makeLeaderboard(context, scores),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(0, 16.0, 0, 0),
-                                    child: OutlinedButton(
-                                        onPressed: () => Navigator.of(context).pop(),
-                                        style: ButtonStyle(
-                                          shape: MaterialStateProperty.all(
-                                              RoundedRectangleBorder(borderRadius: BorderRadius
-                                                  .circular(30.0))),
-                                        ),
-                                        child: const Text("Close")
+                          .getScores(_difficulty)
+                          .then((List<Score> scores) => fadePopup(
+                              context,
+                              AlertDialog(
+                                title: const Center(child: Text("Scores")),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    makeLeaderboard(context, scores),
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          0, 16.0, 0, 0),
+                                      child: OutlinedButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(),
+                                          style: ButtonStyle(
+                                            shape: MaterialStateProperty.all(
+                                                RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30.0))),
+                                          ),
+                                          child: const Text("Close")),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                          ),
-                          dismissable: true)),
-                      icon: const Icon(Icons.leaderboard))
+                              dismissable: true)),
+                      icon: const Icon(Icons.leaderboard)),
+                  IconButton(
+                      color: Theme.of(context).textTheme.bodyMedium!.color!,
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const About()));
+                      },
+                      icon: const Icon(Icons.question_mark))
                 ],
               ),
             ],

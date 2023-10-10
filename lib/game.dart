@@ -106,7 +106,7 @@ class _SudokuGameState extends State<SudokuGame> {
                       onCellTapped: cellPressed,
                       onGameWon: win,
                       onReady: onReady,
-                      difficulty: widget.difficulty,
+                      emptySquares: difficultyToEmptySquares(widget.difficulty),
                       highlightNum: _selectedNumber,
                       savedGame: widget.savedGame,
                       setStopwatchOffset: (Duration d) => _stopwatchOffset = d,

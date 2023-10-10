@@ -98,6 +98,22 @@ class SaveManager {
 
     return ret;
   }
+
+  Future<bool> hasSeenTutorial() async {
+    final SharedPreferences prefs = await _prefs;
+
+    if(!prefs.containsKey("seenTutorial")) {
+      return false;
+    }
+
+    return prefs.getBool("seenTutorial")!;
+  }
+
+  Future<bool> markTutorialSeen(bool seen) async {
+    final SharedPreferences prefs = await _prefs;
+
+    return prefs.setBool("seenTutorial", seen);
+  }
 }
 
 class Score {

@@ -7,6 +7,10 @@ ThemeData buildTheme(Color accentColor, bool isDark) {
 
   return base.copyWith(
     canvasColor: canvasColor,
+    cardColor: canvasColor,
+    appBarTheme: AppBarTheme(
+      backgroundColor: canvasColor,
+    ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: ButtonStyle(
         foregroundColor: MaterialStateProperty.all(accentColor),
@@ -22,7 +26,8 @@ ThemeData buildTheme(Color accentColor, bool isDark) {
     primaryColor: accentColor,
     scaffoldBackgroundColor: canvasColor,
     dividerColor: Color.lerp(accentColor, canvasColor, 0.5),
-    textTheme: _buildTextTheme(base.textTheme, isDark)
+    textTheme: _buildTextTheme(base.textTheme, isDark),
+    colorScheme: ColorScheme.fromSwatch(accentColor: accentColor),
   );
 }
 

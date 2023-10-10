@@ -1,3 +1,6 @@
+import 'package:sudoku/sudoku.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 String timeToString(Duration time) {
   String timeString = "";
 
@@ -15,4 +18,19 @@ String timeToString(Duration time) {
   }
 
   return timeString;
+}
+
+int difficultyToEmptySquares(int difficulty)
+{
+  // TODO: can we make this more difficult?
+  int clues = (difficulties.length - difficulty) * 6;
+  return 60 - clues;
+}
+
+Future<void> launchURL(String url) async
+{
+  Uri uri = Uri.parse(url);
+  if (!await launchUrl(uri)) {
+    throw Exception('Could not launch $uri');
+  }
 }

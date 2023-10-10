@@ -16,14 +16,14 @@ class GameBoard extends StatefulWidget {
   final Function(Duration)? setStopwatchOffset;
   final int highlightNum;
   final bool marking;
-  final int difficulty;
+  final int emptySquares;
   final Sudoku? savedGame;
 
   const GameBoard({super.key,
     required this.onBoardChanged, required this.onCellTapped,
     required this.onGameWon, this.highlightNum = -1, required this.marking,
     required this.onReady, this.setStopwatchOffset,
-    this.difficulty = 0, this.savedGame});
+    this.emptySquares = 0, this.savedGame});
 
   @override
   State<StatefulWidget> createState() => GameBoardState();
@@ -56,17 +56,21 @@ class GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
       child: Container(
         padding: const EdgeInsets.all(8.0),
         margin: const EdgeInsets.all(8.0),
-        child: GridView.builder(
-          shrinkWrap: true,
-          gridDelegate:
-          const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: _boardLength,
+        child: MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          child: GridView.builder(
+            shrinkWrap: true,
+            gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: _boardLength,
+            ),
+            itemBuilder: _buildGridItems,
+            itemCount: _boardLength * _boardLength,
+            primary: true,
+            // disable scrolling
+            physics: const NeverScrollableScrollPhysics(),
           ),
-          itemBuilder: _buildGridItems,
-          itemCount: _boardLength * _boardLength,
-          primary: true,
-          // disable scrolling
-          physics: const NeverScrollableScrollPhysics(),
         ),
       ),
     );
@@ -266,7 +270,7 @@ class GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
 
     Cell cell = _puzzle![y][x];
 
-    //widget.onCellTapped!(cell);
+    widget.onCellTapped?.call(cell);
 
     if (cell.prefill) {
       return;
@@ -373,10 +377,10 @@ class GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
             animation.forward();
           }
 
-          widget.onBoardChanged!(_puzzle!);
-
           _validationWrongCells.removeWhere(
                   (element) => (x == element.x && y == element.y));
+
+          widget.onBoardChanged!(_puzzle!);
 
           List<List<int>> sudoku = List.empty(growable: true);
           for (int row = 0; row < 9; row++) {
@@ -412,15 +416,17 @@ class GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
     widget.onGameWon!(context);
   }
 
-  void ensurePuzzle() {
+  void ensurePuzzle() async {
     if (_puzzle == null) {
       if(widget.savedGame == null || _hasReset) {
         // TODO async?
-        int clues = (difficulties.length - widget.difficulty) * 6;
 
         _puzzle = List.empty(growable: true);
 
-        List<List<int>> board = SudokuGenerator(emptySquares: 60 - clues).newSudoku;
+        int emptySquares = widget.emptySquares;
+        emptySquares.clamp(1, 9*9);
+
+        List<List<int>> board = SudokuGenerator(emptySquares: emptySquares).newSudoku;
 
         for(int row = 0; row < board.length; row++) {
           _puzzle!.add(List.generate(9, (column) {
@@ -433,7 +439,8 @@ class GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
       } else {
 
         _puzzle = widget.savedGame!.game;
-        widget.setStopwatchOffset!(Duration(seconds: widget.savedGame!.time));
+
+        widget.setStopwatchOffset?.call(Duration(seconds: widget.savedGame!.time));
         onReady();
       }
     }
@@ -455,10 +462,11 @@ class GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
       });
     });
 
-    // save the new game
-    widget.onBoardChanged!(_puzzle!);
 
     widget.onReady!();
+
+    // save the new game
+    Future.delayed(Duration.zero, () => widget.onBoardChanged!(_puzzle!));
   }
 
   void validate() {
