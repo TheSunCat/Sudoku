@@ -43,7 +43,7 @@ class _AboutState extends State<About> {
                       textScaleFactor: 2.5,
                     ),
                     const SizedBox(height: 25),
-                    const Text("Thanks for playing! "),
+                    const Text("Thanks for playing!"),
                     const SizedBox(height: 20),
                     FutureBuilder<PackageInfo>(
                       future: PackageInfo.fromPlatform(),
@@ -78,6 +78,7 @@ class _AboutState extends State<About> {
                                 context: context,
                                 applicationName: "Sud💜ku",
                                 applicationVersion: value.version,
+                                applicationLegalese: "Licensed under GPLv3",
                               )),
                       child: const Text("Show licenses"),
                     )
