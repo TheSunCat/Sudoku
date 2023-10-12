@@ -15,6 +15,22 @@ class SaveManager {
 
   SaveManager._internal();
 
+  Future<int> getLastDifficulty() async {
+    final SharedPreferences prefs = await _prefs;
+
+    if(prefs.containsKey("lastDifficulty")) {
+      return prefs.getInt("lastDifficulty")!;
+    } else {
+      return 2; // default to "Medium"
+    }
+  }
+
+  void saveLastDifficulty(int difficulty) async {
+    final SharedPreferences prefs = await _prefs;
+
+    prefs.setInt("lastDifficulty", difficulty);
+  }
+
   Future<bool> saveExists(int difficulty) async {
     final SharedPreferences prefs = await _prefs;
 

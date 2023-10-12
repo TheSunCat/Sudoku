@@ -98,13 +98,14 @@ class _HomePageState extends State<HomePage> {
   bool _hasSave = false;
 
   _HomePageState() {
-    // start at Medium
-    _updateDifficulty(2);
+    // start at saved difficulty
+    SaveManager().getLastDifficulty().then((value) => _updateDifficulty(value));
   }
 
   void _updateDifficulty(int delta) {
     // clamp difficulty within bounds of array
-    _difficulty = max(0, min(difficulties.length - 1, _difficulty + delta));
+    setState(() => _difficulty =
+        max(0, min(difficulties.length - 1, _difficulty + delta)));
 
     Future<bool> saveFuture = SaveManager().saveExists(_difficulty);
 
@@ -112,6 +113,8 @@ class _HomePageState extends State<HomePage> {
           _difficultyStr = difficulties[_difficulty];
           _hasSave = value;
         }));
+
+    SaveManager().saveLastDifficulty(_difficulty);
   }
 
   @override
@@ -164,10 +167,18 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       TextButton(
-                        onPressed: () {
-                          _updateDifficulty(-1);
-                        },
+                        onPressed: _difficulty == 0
+                            ? null
+                            : () {
+                                _updateDifficulty(-1);
+                              },
                         style: ButtonStyle(
+                          foregroundColor:
+                              MaterialStateProperty.resolveWith<Color>(
+                                  (Set<MaterialState> states) =>
+                                      states.contains(MaterialState.disabled)
+                                          ? Colors.grey
+                                          : Theme.of(context).primaryColor),
                           shape: MaterialStateProperty.all(
                               RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30.0))),
@@ -183,10 +194,18 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       TextButton(
-                        onPressed: () {
-                          _updateDifficulty(1);
-                        },
+                        onPressed: _difficulty == difficulties.length - 1
+                            ? null
+                            : () {
+                                _updateDifficulty(1);
+                              },
                         style: ButtonStyle(
+                          foregroundColor:
+                              MaterialStateProperty.resolveWith<Color>(
+                                  (Set<MaterialState> states) =>
+                                      states.contains(MaterialState.disabled)
+                                          ? Colors.grey
+                                          : Theme.of(context).primaryColor),
                           shape: MaterialStateProperty.all(
                               RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30.0))),
