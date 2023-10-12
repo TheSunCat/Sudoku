@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.thesuncat.sudoku">
    <application
-        android:label="sudoku"
+        android:label="SUDOKU"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

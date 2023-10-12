@@ -76,7 +76,7 @@ class _AboutState extends State<About> {
                       onPressed: () => PackageInfo.fromPlatform()
                           .then((value) => showLicensePage(
                                 context: context,
-                                applicationName: "Sud💜ku",
+                                applicationName: "SUD💜KU",
                                 applicationVersion: value.version,
                                 applicationLegalese: "Licensed under GPLv3",
                               )),
