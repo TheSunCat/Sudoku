@@ -6,34 +6,28 @@ publish_to: 'none'
 version: 2.0.0+4
 
 environment:
-  sdk: ">=2.17.5 <3.0.0"
+  sdk: ">=3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
   sudoku_solver_generator: ^2.1.0+1
-
-  # using a local copy to fix old dependency, until PR gets merged
-  dynamic_color_theme:
-    path: external/dynamic_color_theme
-
-  # version 2.3.0 removes dark theme support, which we need
-  system_theme: 2.2.0
+  dynamic_color: ^1.8.1
+  material_color_utilities: ^0.11.1
+  flutter_colorpicker: ^1.1.0
 
   shared_preferences: ^2.0.15
-  intl: ^0.18.0
+  intl: ^0.20.2
   smooth_page_indicator: ^1.1.0
   url_launcher: ^6.1.14
-  package_info_plus: ^4.1.0
+  package_info_plus: ^8.3.1
+  provider: ^6.1.5+1
 
 dev_dependencies:
-  #flutter_test:
-  #  sdk: flutter
+  flutter_lints: ^6.0.0
 
-  flutter_lints: ^2.0.0
-
-  flutter_launcher_icons: ^0.11.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter_icons:
   android: true

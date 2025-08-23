@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 class Move {
   int value;
   List<int> markup;

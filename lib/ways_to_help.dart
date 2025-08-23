@@ -18,9 +18,9 @@ Widget getWaysToHelp(BuildContext context) {
         launchURL("https://github.com/TheSunCat/Sudoku");
       },
       style: ButtonStyle(
-        shape: MaterialStateProperty.all(
+        shape: WidgetStateProperty.all(
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
-        foregroundColor: MaterialStateProperty.all(
+        foregroundColor: WidgetStateProperty.all(
             Theme.of(context).textTheme.bodyMedium!.color!),
       ),
       child: const Padding(
@@ -41,9 +41,9 @@ Widget getWaysToHelp(BuildContext context) {
         launchURL("https://allpurposem.at/link/donate");
       },
       style: ButtonStyle(
-        shape: MaterialStateProperty.all(
+        shape: WidgetStateProperty.all(
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
-        foregroundColor: MaterialStateProperty.all(
+        foregroundColor: WidgetStateProperty.all(
             Theme.of(context).textTheme.bodyMedium!.color!),
       ),
       child: const Padding(

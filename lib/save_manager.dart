@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -125,10 +126,44 @@ class SaveManager {
     return prefs.getBool("seenTutorial")!;
   }
 
-  Future<bool> markTutorialSeen(bool seen) async {
+  Future<void> markTutorialSeen(bool seen) async {
     final SharedPreferences prefs = await _prefs;
 
-    return prefs.setBool("seenTutorial", seen);
+    prefs.setBool("seenTutorial", seen);
+  }
+
+  Future<bool> isCustomTheme() async {
+    final SharedPreferences prefs = await _prefs;
+    return prefs.getBool("customTheme") ?? false;
+  }
+
+  Future<void> markCustomTheme(bool custom) async {
+    final SharedPreferences prefs = await _prefs;
+    prefs.setBool("customTheme", custom);
+  }
+
+  Future<bool> isDark() async {
+    final SharedPreferences prefs = await _prefs;
+    return prefs.getBool("themeDarkMode") ?? false;
+  }
+
+  Future<void> setDark(bool dark) async {
+    final SharedPreferences prefs = await _prefs;
+    prefs.setBool("themeDarkMode", dark);
+  }
+
+  Future<Color?> getPrimaryColor() async {
+    final SharedPreferences prefs = await _prefs;
+    final int? colorVal = prefs.getInt("themePrimaryColor");
+    if(colorVal == null) {
+      return null;
+    }
+    return Color(colorVal);
+  }
+
+  Future<void> setPrimaryColor(Color color) async {
+    final SharedPreferences prefs = await _prefs;
+    prefs.setInt("themePrimaryColor", color.toARGB32());
   }
 }
 

@@ -1,20 +1,18 @@
-import 'package:dynamic_color_theme/dynamic_color_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:sudoku/game_board.dart';
-import 'package:sudoku/main.dart';
 import 'package:sudoku/painters.dart';
 import 'package:sudoku/save_manager.dart';
 import 'package:sudoku/sudoku.dart';
 import 'package:sudoku/ways_to_help.dart';
 
 import 'fade_dialog.dart';
+import 'home_page.dart';
 
 class Tutorial extends StatefulWidget {
   static String id = 'Tutorial';
 
-  const Tutorial({Key? key}) : super(key: key);
+  const Tutorial({super.key});
 
   @override
   State<Tutorial> createState() => _TutorialState();
@@ -37,101 +35,90 @@ class _TutorialState extends State<Tutorial> {
     });
   }
 
-  void close()
-  {
+  void close() {
     SaveManager().markTutorialSeen(true);
-    Navigator.pushReplacement(context,
-        MaterialPageRoute(builder: (context) => const HomePage()));
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => const HomePage()));
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: DynamicColorTheme.of(context).isDark
-              ? Brightness.light
-              : Brightness.dark,
-          systemNavigationBarColor: Colors.transparent,
-        ),
-        child: Scaffold(
-            body: Stack(
-              children: [
-                Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-              Expanded(
-                child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: 3,
-                    itemBuilder: (context, index) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 50, horizontal: 25),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              getPage(index),
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
-              ),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                TextButton(
-                  onPressed: (_currentPage == 0) ? null : () => changePage(-1),
-                  style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) =>
-                          states.contains(MaterialState.disabled)
-                              ? Colors.black
-                              : Theme.of(context).primaryColor,
+    return Scaffold(
+        body: Stack(children: [
+      Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: PageView.builder(
+                controller: _pageController,
+                itemCount: 3,
+                itemBuilder: (context, index) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 50, horizontal: 25),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          getPage(index),
+                        ],
+                      ),
                     ),
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0))),
-                  ),
-                  child: const Icon(Icons.arrow_left),
+                  );
+                }),
+          ),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            TextButton(
+              onPressed: (_currentPage == 0) ? null : () => changePage(-1),
+              style: ButtonStyle(
+                foregroundColor: WidgetStateProperty.resolveWith<Color>(
+                  (Set<WidgetState> states) =>
+                      states.contains(WidgetState.disabled)
+                          ? Colors.black
+                          : Theme.of(context).colorScheme.primary,
                 ),
-                SmoothPageIndicator(
-                  controller: _pageController,
-                  count: _lastPageIndex + 1,
-                  effect: ExpandingDotsEffect(
-                    activeDotColor: Theme.of(context).primaryColor,
-                    dotHeight: 16,
-                    dotWidth: 16,
-                  ),
-                ),
-                TextButton(
-                  onPressed: (_currentPage == _lastPageIndex)
-                      ? null
-                      : () => changePage(1),
-                  style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (Set<MaterialState> states) =>
-                          states.contains(MaterialState.disabled)
-                              ? Colors.black
-                              : Theme.of(context).primaryColor,
-                    ),
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0))),
-                  ),
-                  child: const Icon(Icons.arrow_right),
-                ),
-              ]),
-              const SizedBox(height: 10)
-          ],
-        ),
-        Align(
-            alignment: Alignment.topRight,
-            child: Padding(
-              padding: const EdgeInsets.all(25.0),
-              child: CloseButton(
-                onPressed: () => close(),
+                shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0))),
               ),
-            ))
-    ])));
+              child: const Icon(Icons.arrow_left),
+            ),
+            SmoothPageIndicator(
+              controller: _pageController,
+              count: _lastPageIndex + 1,
+              effect: ExpandingDotsEffect(
+                activeDotColor: Theme.of(context).colorScheme.primary,
+                dotHeight: 16,
+                dotWidth: 16,
+              ),
+            ),
+            TextButton(
+              onPressed:
+                  (_currentPage == _lastPageIndex) ? null : () => changePage(1),
+              style: ButtonStyle(
+                foregroundColor: WidgetStateProperty.resolveWith<Color>(
+                  (Set<WidgetState> states) =>
+                      states.contains(WidgetState.disabled)
+                          ? Colors.black
+                          : Theme.of(context).colorScheme.primary,
+                ),
+                shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0))),
+              ),
+              child: const Icon(Icons.arrow_right),
+            ),
+          ]),
+          const SizedBox(height: 10)
+        ],
+      ),
+      Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+            padding: const EdgeInsets.all(25.0),
+            child: CloseButton(
+              onPressed: () => close(),
+            ),
+          ))
+    ]));
   }
 
   void changePage(int delta) {
@@ -161,7 +148,7 @@ class _TutorialState extends State<Tutorial> {
         const SizedBox(height: 25),
         Container(
           decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+              color: Theme.of(context).colorScheme.primary,
               borderRadius: BorderRadius.circular(500)
               //more than 50% of width makes circle
               ),
@@ -169,7 +156,7 @@ class _TutorialState extends State<Tutorial> {
             padding: const EdgeInsets.all(32.0),
             child: CustomPaint(
               size: Size(screenWidth * .50, screenWidth * .50),
-              painter: LogoPainter(Theme.of(context).canvasColor),
+              painter: LogoPainter(Theme.of(context).colorScheme.surface),
             ),
           ),
         ),
@@ -180,7 +167,7 @@ class _TutorialState extends State<Tutorial> {
         ),
         const SizedBox(height: 25),
         const Text(
-            "The following is a short introduction to the game. If you already know how to play, feel free to press skip!",
+            "The following is a short introduction to the game.\nIf you already know how to play, feel free to press skip!",
             textAlign: TextAlign.center),
         const SizedBox(height: 40),
         Column(
@@ -190,11 +177,11 @@ class _TutorialState extends State<Tutorial> {
                 changePage(1);
               },
               style: ButtonStyle(
-                shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                shape: WidgetStateProperty.all(RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30.0))),
-                foregroundColor: MaterialStateProperty.all(
+                foregroundColor: WidgetStateProperty.all(
                     Theme.of(context).textTheme.bodyMedium!.color!),
-                backgroundColor: MaterialStateProperty.all(
+                backgroundColor: WidgetStateProperty.all(
                     Theme.of(context).primaryColor.withAlpha(200)),
               ),
               child: const Padding(
@@ -210,9 +197,9 @@ class _TutorialState extends State<Tutorial> {
                     curve: Curves.decelerate);
               },
               style: ButtonStyle(
-                shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                shape: WidgetStateProperty.all(RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30.0))),
-                foregroundColor: MaterialStateProperty.all(
+                foregroundColor: WidgetStateProperty.all(
                     Theme.of(context).textTheme.bodyMedium!.color!),
               ),
               child: const Padding(
@@ -290,17 +277,17 @@ class _TutorialState extends State<Tutorial> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(300),
           color: selectedIndex == index
-              ? Theme.of(context).primaryColor
-              : Theme.of(context).canvasColor,
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.surface,
         ),
         child: OutlinedButton(
           onPressed: () {
             numberButtonTapped(index);
           },
           style: ButtonStyle(
-            shape: MaterialStateProperty.all(RoundedRectangleBorder(
+            shape: WidgetStateProperty.all(RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(300.0))),
-            backgroundColor: MaterialStateProperty.all(Colors.transparent),
+            backgroundColor: WidgetStateProperty.all(Colors.transparent),
           ),
           child: FittedBox(
             fit: BoxFit.fill,
@@ -339,11 +326,11 @@ class _TutorialState extends State<Tutorial> {
             close();
           },
           style: ButtonStyle(
-            shape: MaterialStateProperty.all(RoundedRectangleBorder(
+            shape: WidgetStateProperty.all(RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30.0))),
-            foregroundColor: MaterialStateProperty.all(
+            foregroundColor: WidgetStateProperty.all(
                 Theme.of(context).textTheme.bodyMedium!.color!),
-            backgroundColor: MaterialStateProperty.all(
+            backgroundColor: WidgetStateProperty.all(
                 Theme.of(context).primaryColor.withAlpha(200)),
           ),
           child: const Padding(
@@ -382,7 +369,7 @@ class _TutorialState extends State<Tutorial> {
                       changePage(1);
                     },
                     style: ButtonStyle(
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      shape: WidgetStateProperty.all(RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30.0))),
                     ),
                     child: const Text("Next")),

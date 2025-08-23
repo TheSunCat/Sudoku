@@ -1,4 +1,3 @@
-import 'package:dynamic_color_theme/dynamic_color_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:sudoku/util.dart';
 
@@ -23,7 +22,7 @@ Widget makeLeaderboard(BuildContext context, List<Score> scores, { String highli
 
           return Container(
             padding: const EdgeInsets.all(5),
-            color: highlight ? DynamicColorTheme.of(context).color : Colors.transparent,
+            color: highlight ? Theme.of(context).primaryColor : Colors.transparent,
             child: DefaultTextStyle(
               style: TextStyle(
                 color: highlight

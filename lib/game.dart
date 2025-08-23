@@ -1,10 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:intl/intl.dart';
-import 'package:dynamic_color_theme/dynamic_color_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:sudoku/save_manager.dart';
 import 'package:sudoku/sudoku.dart';
 import 'package:sudoku/util.dart';
@@ -19,8 +16,7 @@ class SudokuGame extends StatefulWidget {
   final int difficulty;
   final Sudoku? savedGame;
 
-  const SudokuGame({Key? key, required this.difficulty, this.savedGame})
-      : super(key: key);
+  const SudokuGame({super.key, required this.difficulty, this.savedGame});
 
   @override
   State<SudokuGame> createState() => _SudokuGameState();
@@ -67,198 +63,184 @@ class _SudokuGameState extends State<SudokuGame> {
   Widget build(BuildContext context) {
     String timeString = timeToString(_stopwatch.elapsed + _stopwatchOffset);
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: DynamicColorTheme.of(context).isDark
-            ? Brightness.light
-            : Brightness.dark,
-        systemNavigationBarColor: Colors.transparent,
-      ),
-      child: Scaffold(
-          body: SafeArea(
-        child: Column(
-          children: [
-            makeAppBar(
-                context,
-                timeString,
-                IconButton(
-                  color: Theme.of(context).textTheme.bodyMedium!.color!,
-                  onPressed: () {
-                    // stop the timer while color settings are changed
-                    _stopwatch.stop();
+    return Scaffold(
+        body: SafeArea(
+      child: Column(
+        children: [
+          makeAppBar(
+              context,
+              timeString,
+              IconButton(
+                color: Theme.of(context).colorScheme.secondary,
+                onPressed: () {
+                  // stop the timer while color settings are changed
+                  _stopwatch.stop();
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ColorSettings()),
-                    ).then((value) => setState(() {
-                          _stopwatch.start();
-                        }));
-                  },
-                  icon: const Icon(Icons.color_lens),
-                )),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GameBoard(
-                    key: _gameBoard,
-                    marking: _marking,
-                    onBoardChanged: onBoardChanged,
-                    onCellTapped: cellPressed,
-                    onGameWon: win,
-                    onReady: onReady,
-                    emptySquares: difficultyToEmptySquares(widget.difficulty),
-                    highlightNum: _selectedNumber,
-                    savedGame: widget.savedGame,
-                    setStopwatchOffset: (Duration d) => _stopwatchOffset = d,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Flex(
-                      direction: Axis.horizontal,
-                      children: [
-                        Flexible(
-                          flex: 1,
-                          child: GridView.builder(
-                            shrinkWrap: true,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 5,
-                            ),
-                            itemBuilder: _buildNumberButton,
-                            itemCount: 10,
-                            primary: true, // disable scrolling
-                            physics: const NeverScrollableScrollPhysics(),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ColorSettings()),
+                  ).then((value) => setState(() {
+                        _stopwatch.start();
+                      }));
+                },
+                icon: const Icon(Icons.color_lens),
+              )),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GameBoard(
+                  key: _gameBoard,
+                  marking: _marking,
+                  onBoardChanged: onBoardChanged,
+                  onCellTapped: cellPressed,
+                  onGameWon: win,
+                  onReady: onReady,
+                  emptySquares: difficultyToEmptySquares(widget.difficulty),
+                  highlightNum: _selectedNumber,
+                  savedGame: widget.savedGame,
+                  setStopwatchOffset: (Duration d) => _stopwatchOffset = d,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Flex(
+                    direction: Axis.horizontal,
+                    children: [
+                      Flexible(
+                        flex: 1,
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 5,
                           ),
+                          itemBuilder: _buildNumberButton,
+                          itemCount: 10,
+                          primary: true, // disable scrolling
+                          physics: const NeverScrollableScrollPhysics(),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  SizedBox(
-                    height: 75,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(width: 10),
-                        Expanded(
+                ),
+                SizedBox(
+                  height: 75,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            fadeDialog(
+                                context,
+                                "Are you sure you want to restart with a new board?",
+                                "Cancel",
+                                "Restart",
+                                () => {}, () {
+                              _gameBoard.currentState!.restart();
+
+                              // reset time
+                              _stopwatch.reset();
+                              _stopwatchOffset = const Duration();
+
+                              _selectedNumber = -1;
+                            });
+                          },
+                          style: ButtonStyle(
+                            shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30.0))),
+                            side: WidgetStateProperty.all(
+                                const BorderSide(color: Colors.transparent)),
+                          ),
+                          child: const Icon(Icons.refresh),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            fadeDialog(
+                                context,
+                                "Are you sure you want to validate?",
+                                "Cancel",
+                                "Validate",
+                                () => {}, () {
+                              _gameBoard.currentState!.validate();
+                            });
+                          },
+                          style: ButtonStyle(
+                            shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30.0))),
+                            side: WidgetStateProperty.all(
+                                const BorderSide(color: Colors.transparent)),
+                          ),
+                          child: const Icon(Icons.check),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: AnimatedContainer(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: _marking
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.surface,
+                          ),
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.ease,
                           child: OutlinedButton(
                             onPressed: () {
-                              fadeDialog(
-                                  context,
-                                  "Are you sure you want to restart with a new board?",
-                                  "Cancel",
-                                  "Restart",
-                                  () => {}, () {
-                                _gameBoard.currentState!.restart();
-
-                                // reset time
-                                _stopwatch.reset();
-                                _stopwatchOffset = const Duration();
-
-                                _selectedNumber = -1;
-                              });
+                              // toggle marking mode
+                              setState(() {_marking = !_marking;});
                             },
                             style: ButtonStyle(
-                              shape: MaterialStateProperty.all(
+                              backgroundColor:
+                                  WidgetStateProperty.all(Colors.transparent),
+                              foregroundColor: WidgetStateProperty.all(_marking
+                                  ? Theme.of(context).colorScheme.surface
+                                  : Theme.of(context).colorScheme.primary), // TODO should I use textColor for these?
+                              shape: WidgetStateProperty.all(
                                   RoundedRectangleBorder(
                                       borderRadius:
                                           BorderRadius.circular(30.0))),
-                              side: MaterialStateProperty.all(
+                              side: WidgetStateProperty.all(
                                   const BorderSide(color: Colors.transparent)),
                             ),
-                            child: const Icon(Icons.refresh),
+                            child: const Icon(Icons.edit),
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {
-                              fadeDialog(
-                                  context,
-                                  "Are you sure you want to validate?",
-                                  "Cancel",
-                                  "Validate",
-                                  () => {}, () {
-                                _gameBoard.currentState!.validate();
-                              });
-                            },
-                            style: ButtonStyle(
-                              shape: MaterialStateProperty.all(
-                                  RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(30.0))),
-                              side: MaterialStateProperty.all(
-                                  const BorderSide(color: Colors.transparent)),
-                            ),
-                            child: const Icon(Icons.check),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            _gameBoard.currentState!.undo();
+                          },
+                          style: ButtonStyle(
+                            shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30.0))),
+                            side: WidgetStateProperty.all(
+                                const BorderSide(color: Colors.transparent)),
                           ),
+                          child: const Icon(Icons.undo),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: AnimatedContainer(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30),
-                              color: _marking
-                                  ? Theme.of(context).primaryColor
-                                  : Theme.of(context).canvasColor,
-                            ),
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.ease,
-                            child: OutlinedButton(
-                              onPressed: () {
-                                // toggle marking mode
-                                setState(() => {_marking = !_marking});
-                              },
-                              style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
-                                    Colors.transparent),
-                                foregroundColor: MaterialStateProperty.all(_marking
-                                    ? Theme.of(context).canvasColor
-                                    : Theme.of(context)
-                                        .primaryColor), // TODO should I use textColor for these?
-                                shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(30.0))),
-                                side: MaterialStateProperty.all(
-                                    const BorderSide(
-                                        color: Colors.transparent)),
-                              ),
-                              child: const Icon(Icons.edit),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {
-                              _gameBoard.currentState!.undo();
-                            },
-                            style: ButtonStyle(
-                              shape: MaterialStateProperty.all(
-                                  RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(30.0))),
-                              side: MaterialStateProperty.all(
-                                  const BorderSide(color: Colors.transparent)),
-                            ),
-                            child: const Icon(Icons.undo),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      )),
-    );
+          ),
+        ],
+      ),
+    ));
   }
 
   Widget _buildNumberButton(BuildContext context, int index) {
@@ -283,17 +265,17 @@ class _SudokuGameState extends State<SudokuGame> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(300),
           color: selectedIndex == index
-              ? Theme.of(context).primaryColor
-              : Theme.of(context).canvasColor,
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.surface,
         ),
         child: OutlinedButton(
           onPressed: () {
             numberButtonTapped(index);
           },
           style: ButtonStyle(
-            shape: MaterialStateProperty.all(RoundedRectangleBorder(
+            shape: WidgetStateProperty.all(RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(300.0))),
-            backgroundColor: MaterialStateProperty.all(Colors.transparent),
+            backgroundColor: WidgetStateProperty.all(Colors.transparent),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -315,7 +297,7 @@ class _SudokuGameState extends State<SudokuGame> {
                     (index == 9) ? "X" : (index + 1).toString(),
                     style: TextStyle(
                       color: selectedIndex == index
-                          ? Theme.of(context).canvasColor
+                          ? Theme.of(context).colorScheme.surface
                           : Theme.of(context).textTheme.bodyMedium!.color!,
                     ),
                   ),
@@ -327,7 +309,7 @@ class _SudokuGameState extends State<SudokuGame> {
                   countString,
                   style: TextStyle(
                     color: selectedIndex == index
-                        ? Theme.of(context).canvasColor
+                        ? Theme.of(context).colorScheme.surface
                         : Theme.of(context).textTheme.bodyMedium!.color!,
                   ),
                 ),
@@ -454,7 +436,7 @@ class _SudokuGameState extends State<SudokuGame> {
                         Navigator.of(context).pop();
                       },
                       style: ButtonStyle(
-                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                        shape: WidgetStateProperty.all(RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0))),
                       ),
                       child: const Text("Got it!")),

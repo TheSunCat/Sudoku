@@ -90,7 +90,7 @@ class GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
       right: ((x % sectorLength == sectorLength - 1) && (x != boardLength - 1))
           ? BorderSide(width: 2.0, color: Theme
           .of(context)
-          .primaryColor)
+          .colorScheme.primary)
           : ((x == boardLength - 1)
           ? BorderSide.none
           : BorderSide(width: 1.0, color: Theme
@@ -99,7 +99,7 @@ class GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
       bottom: ((y % sectorLength == sectorLength - 1) && (y != boardLength - 1))
           ? BorderSide(width: 2.0, color: Theme
           .of(context)
-          .primaryColor)
+          .colorScheme.primary)
           : ((y == boardLength - 1)
           ? BorderSide.none
           : BorderSide(width: 1.0, color: Theme
@@ -147,8 +147,8 @@ class GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
     Color itemColor = Colors.transparent;
 
     if (cell.prefill) {
-      textColor = textColor.withOpacity(0.65);
-      itemColor = textColor.withOpacity(0.07);
+      textColor = textColor.withValues(alpha: 0.65);
+      itemColor = textColor.withValues(alpha: 0.07);
     }
 
     bool highlighted = false;
@@ -156,7 +156,7 @@ class GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
     if (val == widget.highlightNum || cell.markup.contains(widget.highlightNum)) {
       itemColor = Theme
           .of(context)
-          .primaryColor;
+          .colorScheme.primary;
       highlighted = true;
     }
 

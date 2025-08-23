@@ -1,4 +1,3 @@
-import 'package:dynamic_color_theme/dynamic_color_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -8,7 +7,7 @@ import 'package:sudoku/ways_to_help.dart';
 import 'custom_app_bar.dart';
 
 class About extends StatefulWidget {
-  const About({Key? key}) : super(key: key);
+  const About({super.key});
 
   @override
   State<About> createState() => _AboutState();
@@ -20,9 +19,7 @@ class _AboutState extends State<About> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
-          statusBarIconBrightness: DynamicColorTheme.of(context).isDark
-              ? Brightness.light
-              : Brightness.dark,
+          statusBarIconBrightness: MediaQuery.of(context).platformBrightness,
           systemNavigationBarColor: Colors.transparent,
         ),
         child: Scaffold(
@@ -40,7 +37,7 @@ class _AboutState extends State<About> {
                     const SizedBox(height: 25),
                     const Text(
                       "About Sud💜ku",
-                      textScaleFactor: 2.5,
+                      textScaler: TextScaler.linear(2.5),
                     ),
                     const SizedBox(height: 25),
                     const Text("Thanks for playing!"),
