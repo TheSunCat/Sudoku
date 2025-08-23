@@ -10,6 +10,7 @@ import 'about.dart';
 import 'color_settings.dart';
 import 'fade_dialog.dart';
 import 'game.dart';
+import 'l10n/app_localizations.dart';
 import 'leaderboard.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,27 +24,31 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _difficulty = 0;
-  String _difficultyStr = "Medium";
+  String _difficultyStr = "";
   bool _hasSave = false;
-
-  _HomePageState() {
-    // start at saved difficulty
-    SaveManager().getLastDifficulty().then((value) => _updateDifficulty(value));
-  }
 
   void _updateDifficulty(int delta) {
     // clamp difficulty within bounds of array
     setState(() => _difficulty =
-        max(0, min(difficulties.length - 1, _difficulty + delta)));
+        max(0, min(Sudoku.numDifficulties - 1, _difficulty + delta)));
 
     Future<bool> saveFuture = SaveManager().saveExists(_difficulty);
 
     saveFuture.then((value) => setState(() {
-      _difficultyStr = difficulties[_difficulty];
+      _difficultyStr = AppLocalizations.of(context)!.difficulties.split(':')[_difficulty];
       _hasSave = value;
     }));
 
     SaveManager().saveLastDifficulty(_difficulty);
+  }
+
+  @override void initState() {
+    super.initState();
+
+    // start at saved difficulty
+    SaveManager().getLastDifficulty().then((value) => {
+      _updateDifficulty(value)
+    });
   }
 
   @override
@@ -121,7 +126,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       TextButton(
-                        onPressed: _difficulty == difficulties.length - 1
+                        onPressed: _difficulty == Sudoku.numDifficulties - 1
                             ? null
                             : () {
                           _updateDifficulty(1);
@@ -160,9 +165,9 @@ class _HomePageState extends State<HomePage> {
                         foregroundColor: WidgetStateProperty.all(
                             Theme.of(context).textTheme.bodyMedium!.color!),
                       ),
-                      child: const Padding(
+                      child: Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: Text("New Game", style: TextStyle(fontSize: 20)),
+                        child: Text(AppLocalizations.of(context)!.homeNewGame, style: TextStyle(fontSize: 20)),
                       ),
                     ),
                   ),
@@ -199,9 +204,9 @@ class _HomePageState extends State<HomePage> {
                                       .color!
                                       .withValues(alpha: _hasSave ? 1 : 0.5)),
                             ),
-                            child: const Padding(
+                            child: Padding(
                               padding: EdgeInsets.all(16.0),
-                              child: Text("Continue",
+                              child: Text(AppLocalizations.of(context)!.homeContinue,
                                   style: TextStyle(fontSize: 20)),
                             ));
                       }),
@@ -226,7 +231,7 @@ class _HomePageState extends State<HomePage> {
                           .then((List<Score> scores) => fadePopup(
                           context,
                           AlertDialog(
-                            title: const Center(child: Text("Scores")),
+                            title: Center(child: Text(AppLocalizations.of(context)!.leaderboardScores)),
                             content: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -244,7 +249,7 @@ class _HomePageState extends State<HomePage> {
                                                 BorderRadius.circular(
                                                     30.0))),
                                       ),
-                                      child: const Text("Close")),
+                                      child: Text(AppLocalizations.of(context)!.leaderboardClose)),
                                 ),
                               ],
                             ),

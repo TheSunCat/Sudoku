@@ -1,0 +1,49 @@
+{
+    "difficulties": "Beginner:Easy:Medium:Hard:Extreme",
+    
+    "homeNewGame": "New Game",
+    "homeContinue": "Continue",
+    
+    "themeTitle": "Color Settings",
+    "themePrimaryColor": "Primary color:",
+    "themePickPrimaryColor": "Pick a primary color:",
+    "themeDarkTheme": "Dark theme:",
+    "themeResetTheme": "Reset theme",
+    
+    "leaderboardScores": "Scores",
+    "leaderboardNoScoresYet": "No scores yet.",
+    "leaderboardClose": "Close",
+
+    "winStrings": "You win!:Congration, you done it!:Great job!:Impressive.:EYYYYYYYY!:All our base are belong to you.:You're winner!:A winner is you!:A{adjective} game!",
+    "@winStrings": {
+        "description": "One of these is picked for the winscreen, but the last one has a much higher chance and gets filled with a random adjective from winAdjectives."
+    },
+
+    "winAdjectives": " charming: determined: fabulous: dynamic:n imaginative: breathtaking: brilliant:n elegant: lovely: spectacular:n internet-worthy: screenshot-worthy: duck-like:n explosive: devious:n excellent: concise",
+    
+    "winDifficulty": "Difficulty: {difficulty}",
+    "winValidationsUsed": "Validations used: {count}",
+    "winTime": "Time: {time}",
+    "winGotIt": "Got it!",
+
+    "aboutSudoku": "About {name}",
+    "aboutThanks": "Thanks for playing!",
+    "aboutVersion": "Version: {version}",
+    "aboutFossNotice": "{name} is open source software. No user data is collected, and the game is made available free of charge for everyone.",
+    "aboutContributionsAppreciated": "Development and maintenance of this application takes many hours of work, and any contribution is vastly appreciated!",
+    "aboutWaysToHelp": "Here are some ways you can help:",
+    "aboutSubmitPatch": "Submit a patch",
+    "aboutDonate": "Donate",
+    "aboutReplayTutorial": "Replay tutorial",
+    "aboutShowLicenses": "Show licenses",
+    
+    "tutorialWelcome": "Welcome to {name}!",
+    "tutorialIntroduction": "The following is a short introduction to the game.\nIf you already know how to play, feel free to press skip!",
+    "tutorialContinue": "Continue",
+    "tutorialSkip": "Skip",
+    "tutorialLine0": "Every row, column, and 3x3 box must contain every number from 1-9.",
+    "tutorialLine1": "Select a number below, then tap an empty cell to fill it in.",
+    "tutorialLine2": "You can also tap a filled-in cell to select its number.",
+    "tutorialFinished": "Now you're ready to play!",
+    "tutorialNoHelp": "No thanks"
+}

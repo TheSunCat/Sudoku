@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:sudoku/util.dart';
 
+import 'l10n/app_localizations.dart';
+
 Widget getWaysToHelp(BuildContext context) {
   return Column(children: [
-    const Text(
-        "Sud💜ku is open source software. No user data is collected, and the game is made available free of charge for everyone.",
+    Text(
+        AppLocalizations.of(context)!.aboutFossNotice("Sud💜ku"),
         textAlign: TextAlign.center),
     const SizedBox(height: 10),
-    const Text(
-        "Development and maintenance of this application takes many hours of work, and any contribution is vastly appreciated!",
+    Text(
+        AppLocalizations.of(context)!.aboutContributionsAppreciated,
         textAlign: TextAlign.center),
     const SizedBox(height: 10),
-    const Text("Here are some ways you can help:", textAlign: TextAlign.center),
+    Text(AppLocalizations.of(context)!.aboutWaysToHelp, textAlign: TextAlign.center),
     const SizedBox(height: 40),
     OutlinedButton(
       onPressed: () async {
@@ -23,14 +25,14 @@ Widget getWaysToHelp(BuildContext context) {
         foregroundColor: WidgetStateProperty.all(
             Theme.of(context).textTheme.bodyMedium!.color!),
       ),
-      child: const Padding(
-        padding: EdgeInsets.all(16.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.code),
-            SizedBox(width: 5),
-            Text("Submit a patch", style: TextStyle(fontSize: 20)),
+            const Icon(Icons.code),
+            const SizedBox(width: 5),
+            Text(AppLocalizations.of(context)!.aboutSubmitPatch, style: const TextStyle(fontSize: 20)),
           ],
         ),
       ),
@@ -46,14 +48,14 @@ Widget getWaysToHelp(BuildContext context) {
         foregroundColor: WidgetStateProperty.all(
             Theme.of(context).textTheme.bodyMedium!.color!),
       ),
-      child: const Padding(
-        padding: EdgeInsets.all(16.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.attach_money),
-            SizedBox(width: 5),
-            Text("Donate", style: TextStyle(fontSize: 20)),
+            const Icon(Icons.attach_money),
+            const SizedBox(width: 5),
+            Text(AppLocalizations.of(context)!.aboutDonate, style: const TextStyle(fontSize: 20)),
           ],
         ),
       ),

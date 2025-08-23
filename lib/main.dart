@@ -2,6 +2,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:sudoku/l10n/app_localizations.dart';
 import 'package:sudoku/save_manager.dart';
 import 'package:sudoku/theme.dart';
 import 'package:sudoku/tutorial.dart';
@@ -78,6 +79,8 @@ class _MainAppState extends State<MainApp> {
                   HomePage.id: (context) => const HomePage(),
                   Tutorial.id: (context) => const Tutorial(),
                 },
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
               );
             }));
       },

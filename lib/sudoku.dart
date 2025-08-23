@@ -2,6 +2,8 @@ class Sudoku {
   List<List<Cell>> game;
   int time;
 
+  static int numDifficulties = 5;
+
   Sudoku(this.game, this.time);
 
   factory Sudoku.fromJson(Map<String, dynamic> json) =>
@@ -48,11 +50,3 @@ class Position {
     'y': y
   };
 }
-
-final List<String> difficulties = [
-  "Beginner",
-  "Easy",
-  "Medium",
-  "Hard",
-  "Extreme"
-];

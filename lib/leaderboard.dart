@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sudoku/util.dart';
 
+import 'l10n/app_localizations.dart';
 import 'save_manager.dart';
 
 Widget makeLeaderboard(BuildContext context, List<Score> scores, { String highlightTime = "none" })
@@ -8,7 +9,7 @@ Widget makeLeaderboard(BuildContext context, List<Score> scores, { String highli
   bool alreadyHighlighted = false;
 
   return scores.isEmpty ?
-    const Text("No scores yet.")
+    Text(AppLocalizations.of(context)!.leaderboardNoScoresYet)
     : SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
       child: Column(

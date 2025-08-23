@@ -5,6 +5,8 @@ import 'package:sudoku/custom_app_bar.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:sudoku/theme.dart';
 
+import 'l10n/app_localizations.dart';
+
 class ColorSettings extends StatefulWidget {
   const ColorSettings({super.key});
 
@@ -33,7 +35,7 @@ class _ColorSettingsState extends State<ColorSettings> {
                 children: [
                   Expanded(
                     flex: 1,
-                    child: Align(alignment: Alignment.topLeft, child: makeAppBar(context, "Color Settings", null)),
+                    child: Align(alignment: Alignment.topLeft, child: makeAppBar(context, AppLocalizations.of(context)!.themeTitle, null)),
                   ),
                   const Expanded(flex: 6, child: SizedBox.shrink()),
                   Expanded(
@@ -45,9 +47,9 @@ class _ColorSettingsState extends State<ColorSettings> {
                           flex: 1,
                           child: SizedBox.shrink(),
                         ),
-                        const Expanded(
+                        Expanded(
                           flex: 3,
-                          child: Text("Primary color:\t\t\t"),
+                          child: Text(AppLocalizations.of(context)!.themePrimaryColor),
                         ),
                         Expanded(
                           flex: 3,
@@ -58,7 +60,7 @@ class _ColorSettingsState extends State<ColorSettings> {
                                   final theme = Provider.of<ThemeProvider>(context, listen: false);
 
                                   return AlertDialog(
-                                    title: const Text("Pick a primary color:"),
+                                    title: Text(AppLocalizations.of(context)!.themePickPrimaryColor),
                                     content: SingleChildScrollView(
                                       child: ColorPicker(
                                           enableAlpha: false,
@@ -103,7 +105,7 @@ class _ColorSettingsState extends State<ColorSettings> {
                         flex: 1,
                         child: SizedBox.shrink(),
                       ),
-                      const Expanded(flex: 3, child: Text("Dark theme:\t\t\t")),
+                      Expanded(flex: 3, child: Text(AppLocalizations.of(context)!.themeDarkTheme)),
                       Expanded(
                         flex: 3,
                         child: OutlinedButton(
@@ -145,7 +147,7 @@ class _ColorSettingsState extends State<ColorSettings> {
                         shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
                         enableFeedback: false,
                       ),
-                      child: const Text("Reset theme"),
+                      child: Text(AppLocalizations.of(context)!.themeResetTheme),
                     ),
                   ),
                   const Expanded(flex: 15, child: SizedBox.shrink()),

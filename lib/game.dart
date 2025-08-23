@@ -10,6 +10,7 @@ import 'color_settings.dart';
 import 'custom_app_bar.dart';
 import 'fade_dialog.dart';
 import 'game_board.dart';
+import 'l10n/app_localizations.dart';
 import 'leaderboard.dart';
 
 class SudokuGame extends StatefulWidget {
@@ -361,45 +362,13 @@ class _SudokuGameState extends State<SudokuGame> {
       // funny random win string generation
       Random rand = Random();
 
-      List<String> winStrings = [
-        "You win!",
-        "Congration, you done it!",
-        "Great job!",
-        "Impressive.",
-        "EYYYYYYYY!",
-        "All our base are belong to you.",
-        "You're winner!",
-        "A winner is you!",
-        "A ADJECTIVE game!"
-      ];
+      final List<String> adjectives = AppLocalizations.of(context)!.winAdjectives.split(':');
+      final List<String> winStrings = AppLocalizations.of(context)!.winStrings(adjectives[rand.nextInt(adjectives.length)]).split(':');
 
       // make the last entry very likely
       int winStringIndex =
           rand.nextInt(winStrings.length * 2).clamp(0, winStrings.length - 1);
       String winString = winStrings[winStringIndex];
-
-      List<String> adjectives = [
-        " charming",
-        " determined",
-        " fabulous",
-        " dynamic",
-        "n imaginative",
-        " breathtaking",
-        " brilliant",
-        "n elegant",
-        " lovely",
-        " spectacular",
-        "n internet-worthy",
-        " screenshot-worthy",
-        " duck-like",
-        "n explosive",
-        " devious",
-        "n excellent",
-        " concise"
-      ];
-
-      winString = winString.replaceAll(
-          " ADJECTIVE", adjectives[rand.nextInt(adjectives.length)]);
 
       if (!context.mounted) {
         print("BUG: this should never happen");
@@ -413,15 +382,15 @@ class _SudokuGameState extends State<SudokuGame> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("Difficulty: ${difficulties[widget.difficulty]}"),
+                Text(AppLocalizations.of(context)!.winDifficulty(AppLocalizations.of(context)!.difficulties.split(':')[widget.difficulty])),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                        "Validations used: ${_gameBoard.currentState!.getValidations()}"),
+                        AppLocalizations.of(context)!.winValidationsUsed(_gameBoard.currentState!.getValidations())),
                   ],
                 ),
-                Text("Time: $timeString"),
+                Text(AppLocalizations.of(context)!.winTime(timeString)),
                 const SizedBox(height: 10),
                 makeLeaderboard(context, newScores, highlightTime: timeString),
                 Padding(
@@ -439,7 +408,7 @@ class _SudokuGameState extends State<SudokuGame> {
                         shape: WidgetStateProperty.all(RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0))),
                       ),
-                      child: const Text("Got it!")),
+                      child: Text(AppLocalizations.of(context)!.winGotIt)),
                 ),
               ],
             ),

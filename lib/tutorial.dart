@@ -8,6 +8,7 @@ import 'package:sudoku/ways_to_help.dart';
 
 import 'fade_dialog.dart';
 import 'home_page.dart';
+import 'l10n/app_localizations.dart';
 
 class Tutorial extends StatefulWidget {
   static String id = 'Tutorial';
@@ -162,12 +163,12 @@ class _TutorialState extends State<Tutorial> {
         ),
         const SizedBox(height: 50),
         Text(
-          "Welcome to Sud💜ku!",
+          AppLocalizations.of(context)!.tutorialWelcome("Sud💜ku"),
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 25),
-        const Text(
-            "The following is a short introduction to the game.\nIf you already know how to play, feel free to press skip!",
+        Text(
+            AppLocalizations.of(context)!.tutorialIntroduction,
             textAlign: TextAlign.center),
         const SizedBox(height: 40),
         Column(
@@ -184,9 +185,9 @@ class _TutorialState extends State<Tutorial> {
                 backgroundColor: WidgetStateProperty.all(
                     Theme.of(context).primaryColor.withAlpha(200)),
               ),
-              child: const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text("Continue", style: TextStyle(fontSize: 20)),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(AppLocalizations.of(context)!.tutorialContinue, style: const TextStyle(fontSize: 20)),
               ),
             ),
             const SizedBox(height: 20),
@@ -202,9 +203,9 @@ class _TutorialState extends State<Tutorial> {
                 foregroundColor: WidgetStateProperty.all(
                     Theme.of(context).textTheme.bodyMedium!.color!),
               ),
-              child: const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text("Skip", style: TextStyle(fontSize: 20)),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(AppLocalizations.of(context)!.tutorialSkip, style: const TextStyle(fontSize: 20)),
               ),
             )
           ],
@@ -233,18 +234,18 @@ class _TutorialState extends State<Tutorial> {
           ),
         ),
         const SizedBox(height: 10),
-        const Text(
-          "Every row, column, and 3x3 box must contain every number from 1-9.",
+        Text(
+          AppLocalizations.of(context)!.tutorialLine0,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 10),
-        const Text(
-          "Select a number below, then tap an empty cell to fill it in.",
+        Text(
+          AppLocalizations.of(context)!.tutorialLine1,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 10),
-        const Text(
-          "You can also tap a filled-in cell to select its number.",
+        Text(
+          AppLocalizations.of(context)!.tutorialLine2,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 20),
@@ -315,7 +316,7 @@ class _TutorialState extends State<Tutorial> {
       children: [
         const SizedBox(height: 50),
         Text(
-          "Now you're ready to play!",
+          AppLocalizations.of(context)!.tutorialFinished,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 50),
@@ -333,9 +334,9 @@ class _TutorialState extends State<Tutorial> {
             backgroundColor: WidgetStateProperty.all(
                 Theme.of(context).primaryColor.withAlpha(200)),
           ),
-          child: const Padding(
+          child: Padding(
             padding: EdgeInsets.all(16.0),
-            child: Text("Maybe later", style: TextStyle(fontSize: 20)),
+            child: Text(AppLocalizations.of(context)!.tutorialNoHelp, style: TextStyle(fontSize: 20)),
           ),
         ),
       ],

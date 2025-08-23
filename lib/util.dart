@@ -1,6 +1,7 @@
 import 'package:sudoku/sudoku.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+// TODO: maybe localize this
 String timeToString(Duration time) {
   String timeString = "";
 
@@ -23,7 +24,7 @@ String timeToString(Duration time) {
 int difficultyToEmptySquares(int difficulty)
 {
   // TODO: can we make this more difficult?
-  int clues = (difficulties.length - difficulty) * 6;
+  int clues = (Sudoku.numDifficulties - difficulty) * 6;
   return 60 - clues;
 }
 

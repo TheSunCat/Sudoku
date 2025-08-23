@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:sudoku/l10n/app_localizations.dart';
 import 'package:sudoku/tutorial.dart';
 import 'package:sudoku/ways_to_help.dart';
 
@@ -35,12 +36,12 @@ class _AboutState extends State<About> {
                   padding: const EdgeInsets.symmetric(horizontal: 50.0),
                   child: Column(children: [
                     const SizedBox(height: 25),
-                    const Text(
-                      "About Sud💜ku",
+                    Text(
+                      AppLocalizations.of(context)!.aboutSudoku("Sud💜ku"),
                       textScaler: TextScaler.linear(2.5),
                     ),
                     const SizedBox(height: 25),
-                    const Text("Thanks for playing!"),
+                    Text(AppLocalizations.of(context)!.aboutThanks),
                     const SizedBox(height: 20),
                     FutureBuilder<PackageInfo>(
                       future: PackageInfo.fromPlatform(),
@@ -50,7 +51,7 @@ class _AboutState extends State<About> {
                             return Align(
                               alignment: Alignment.bottomCenter,
                               child: Text(
-                                'Version: ${snapshot.data!.version}',
+                                AppLocalizations.of(context)!.aboutVersion(snapshot.data?.version ?? "???"),
                               ),
                             );
                           default:
@@ -67,7 +68,7 @@ class _AboutState extends State<About> {
                         Navigator.of(context).pushReplacement(MaterialPageRoute(
                           builder: (context) => const Tutorial()));
                       },
-                      child: const Text("Replay tutorial"),
+                      child: Text(AppLocalizations.of(context)!.aboutReplayTutorial),
                     ),
                     TextButton(
                       onPressed: () => PackageInfo.fromPlatform()
@@ -77,7 +78,7 @@ class _AboutState extends State<About> {
                                 applicationVersion: value.version,
                                 applicationLegalese: "Licensed under GPLv3",
                               )),
-                      child: const Text("Show licenses"),
+                      child: Text(AppLocalizations.of(context)!.aboutShowLicenses),
                     )
                   ]),
                 ),

@@ -132,3 +132,4 @@ app.*.symbols
 !/dev/ci/**/Gemfile.lock
 
 .direnv/
+lib/l10n/app_localizations*.dart
