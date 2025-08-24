@@ -25,7 +25,7 @@
       buildToolsVersions = [buildToolsVersion];
       platformVersions = ["31" "32" "33" "34" "35"];
       includeNDK = true;
-      ndkVersion = "27.0.12077973";
+      ndkVersion = "26.3.11579264";
       cmakeVersions = [cmakeVersion];
       includeEmulator = false;
       useGoogleAPIs = false;
